@@ -27,15 +27,19 @@ public class User {
     @Column(name = "role", nullable = false, length = 50)
     private String role;
 
+    @Column(name = "privileges", nullable = false)
+    private String privileges;
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    public User(String username, String password, String email, String phoneNumber, String role) {
+    public User(String username, String password, String email, String phoneNumber, String role, String privileges) {
         this.username = username;
         this.password = password;
         this.email = email;
         this.phoneNumber = phoneNumber;
         this.role = role;
+        this.privileges = privileges;
     }
 
     public User() {
@@ -88,6 +92,14 @@ public class User {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public String getPrivileges() {
+        return privileges;
+    }
+
+    public void setPrivileges(String privileges) {
+        this.privileges = privileges;
     }
 
     public LocalDateTime getCreatedAt() {
