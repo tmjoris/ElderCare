@@ -1,7 +1,7 @@
-package com.app4080.eldercareserver.Prescription;
+package com.app4080.eldercareserver.repository;
 
-import com.app4080.eldercareserver.MedicalRecord.MedicalRecord;
-import com.app4080.eldercareserver.Patient.Patient;
+import com.app4080.eldercareserver.entity.MedicalRecord;
+import com.app4080.eldercareserver.entity.Prescription;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

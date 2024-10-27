@@ -1,4 +1,4 @@
-package com.app4080.eldercareserver.User;
+package com.app4080.eldercareserver.entity;
 
 import jakarta.persistence.*;
 

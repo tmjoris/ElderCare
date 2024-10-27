@@ -1,7 +1,5 @@
-package com.app4080.eldercareserver.ProgressReport;
+package com.app4080.eldercareserver.entity;
 
-import com.app4080.eldercareserver.Patient.Patient;
-import com.app4080.eldercareserver.User.User;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 

@@ -1,8 +1,5 @@
-package com.app4080.eldercareserver.Prescription;
+package com.app4080.eldercareserver.entity;
 
-import com.app4080.eldercareserver.MedicalRecord.MedicalRecord;
-import com.app4080.eldercareserver.Medication.Medication;
-import com.app4080.eldercareserver.User.User;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 
