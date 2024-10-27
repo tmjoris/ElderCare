@@ -23,7 +23,7 @@ public class Prescription {
     private Medication medication;
 
     @ManyToOne
-    @JoinColumn(name = "doctor_id", nullable = false)
+    @JoinColumn(name = "doctor_id", nullable = true)
     private User doctor;
 
     @Column(name = "instructions", length = 1000)
