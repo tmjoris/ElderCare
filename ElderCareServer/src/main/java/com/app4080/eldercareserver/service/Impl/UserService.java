@@ -37,7 +37,7 @@ public class UserService {
     }
 
     @Transactional
-    public User createUser(User user) throws AccessDeniedException {
+    public User createUser(User user) throws IllegalArgumentException {
 
         // Validate unique constraints
         if (userRepository.existsByUsername(user.getUsername())) {
@@ -51,7 +51,7 @@ public class UserService {
     }
 
     @Transactional
-    public void deleteUser(User user) throws AccessDeniedException {
+    public void deleteUser(User user) throws IllegalArgumentException {
         if (!userRepository.existsByUsername(user.getUsername())) {
             throw new IllegalArgumentException("Username does not exist");
         }
