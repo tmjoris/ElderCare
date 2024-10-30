@@ -51,7 +51,14 @@ public class UserService {
     }
 
     @Transactional
-    public void deleteUser(User user) throws AccessDeniedException {}
+    public void deleteUser(User user) throws AccessDeniedException {
+        if (!userRepository.existsByUsername(user.getUsername())) {
+            throw new IllegalArgumentException("Username does not exist");
+        }
+
+        userRepository.delete(user);
+        return;
+    }
 
     // 0 for success, -1 for failure
     public int login(@org.jetbrains.annotations.NotNull User user) throws AccessDeniedException {
