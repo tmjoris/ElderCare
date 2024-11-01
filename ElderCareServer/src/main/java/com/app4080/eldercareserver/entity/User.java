@@ -21,6 +21,12 @@ public class User {
     @Column(name = "email", nullable = false, length = 150)
     private String email;
 
+    @Column(name = "primary_location", nullable = false)
+    private String primaryLocation;
+
+    @Column(name = "secondary_location", nullable = true)
+    private String secondaryLocation;
+
     @Column(name = "phone_number", length = 20)
     private String phoneNumber;
 
@@ -42,12 +48,39 @@ public class User {
         this.privileges = privileges;
     }
 
+    public User(String username, String password, String email, String primaryLocation, String secondaryLocation, String phoneNumber, String role, String privileges) {
+        this.username = username;
+        this.password = password;
+        this.email = email;
+        this.primaryLocation = primaryLocation;
+        this.secondaryLocation = secondaryLocation;
+        this.phoneNumber = phoneNumber;
+        this.role = role;
+        this.privileges = privileges;
+    }
+
     public User() {
 
     }
 
     public Long getId() {
         return id;
+    }
+
+    public String getPrimaryLocation() {
+        return primaryLocation;
+    }
+
+    public void setPrimaryLocation(String primaryLocation) {
+        this.primaryLocation = primaryLocation;
+    }
+
+    public String getSecondaryLocation() {
+        return secondaryLocation;
+    }
+
+    public void setSecondaryLocation(String secondaryLocation) {
+        this.secondaryLocation = secondaryLocation;
     }
 
     public void setId(Long id) {
