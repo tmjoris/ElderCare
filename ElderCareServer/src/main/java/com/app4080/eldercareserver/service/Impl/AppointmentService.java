@@ -69,4 +69,16 @@ public class AppointmentService {
 
         return appointmentRepository.findByDoctorId(doctor.getId());
     }
+
+    public List<Appointment> getAppointmentByPatient(Patient patient){
+        if (!checkPatientExists(patient)){
+            throw new IllegalArgumentException("Invalid Patient");
+        }
+
+        return appointmentRepository.findByPatientId(patient.getId());
+    }
+
+    public List<Appointment> getAppointmentBYLocation(String location){
+        return appointmentRepository.findByLocation(location);
+    }
 }

@@ -22,6 +22,9 @@ public class Appointment {
     @Column(name = "appointment_date", nullable = false)
     private LocalDateTime appointmentDate;
 
+    @Column(name = "location", nullable = false)
+    private String location;
+
     @Column(name = "status", nullable = false, length = 50)
     private String status;
 
@@ -31,6 +34,22 @@ public class Appointment {
     // Constructors, Getters, Setters
 
     public Appointment() {
+    }
+
+    public Appointment(Patient patient, User doctor, LocalDateTime appointmentDate, String location, String status) {
+        this.patient = patient;
+        this.doctor = doctor;
+        this.appointmentDate = appointmentDate;
+        this.location = location;
+        this.status = status;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
     }
 
     public Long getId() {
