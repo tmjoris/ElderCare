@@ -51,13 +51,21 @@ public class UserService {
     }
 
     @Transactional
+    public User updateInfo(User user) throws IllegalArgumentException{
+        if(!userRepository.existsByUsername(user.getUsername())){
+            throw new IllegalArgumentException("Username does not exist");
+        }
+
+        return userRepository.save(user);
+    }
+
+    @Transactional
     public void deleteUser(User user) throws IllegalArgumentException {
         if (!userRepository.existsByUsername(user.getUsername())) {
             throw new IllegalArgumentException("Username does not exist");
         }
 
         userRepository.delete(user);
-        return;
     }
 
     // 0 for success, -1 for failure
