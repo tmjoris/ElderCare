@@ -82,41 +82,49 @@ public class UserService {
     }
 
     // Find a user by username
+    @Transactional(readOnly = true)
     public Optional<User> findUserByUsername(String username) {
         return userRepository.findByUsername(username);
     }
 
     // Find users by role
+    @Transactional(readOnly = true)
     public List<User> findUsersByRole(String role) {
         return userRepository.findByRole(role);
     }
 
     // Find users by privileges
+    @Transactional(readOnly = true)
     public List<User> findUsersByPrivileges(String privileges) {
         return userRepository.findByPrivileges(privileges);
     }
 
     // Find users by email
+    @Transactional(readOnly = true)
     public List<User> findUsersByEmail(String email) {
         return userRepository.findByEmail(email);
     }
 
     // Find users by primary location
+    @Transactional(readOnly = true)
     public List<User> findUsersByPrimaryLocation(String primaryLocation) {
         return userRepository.findByPrimaryLocation(primaryLocation);
     }
 
     // Find users by secondary location
+    @Transactional(readOnly = true)
     public List<User> findUsersBySecondaryLocation(String secondaryLocation) {
         return userRepository.findBySecondaryLocation(secondaryLocation);
     }
 
     // Find users by role and privileges
+    @Transactional(readOnly = true)
     public List<User> findUsersByRoleAndPrivileges(String role, String privileges) {
         return userRepository.findByRoleAndPrivileges(role, privileges);
     }
 
     // Search for users by term in username, email, or phone number
+    @Transactional(readOnly = true)
     public List<User> searchUsers(String searchTerm) {
         return userRepository.searchUsers(searchTerm);
     }
