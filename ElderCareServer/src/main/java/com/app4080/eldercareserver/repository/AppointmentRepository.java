@@ -27,7 +27,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     List<Appointment> findUpcomingAppointments();
 
     // Find overlapping appointments for a doctor
-    @Query("SELECT a FROM Appointment a WHERE a.doctorId = :doctorId " +
+    @Query("SELECT a FROM Appointment a WHERE a.doctor.id = :doctorId " +
             "AND a.appointmentDate BETWEEN :startTime AND :endTime")
     List<Appointment> findOverlappingAppointments(
             @Param("doctorId") Long doctorId,

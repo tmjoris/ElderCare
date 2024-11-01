@@ -1,4 +1,5 @@
 package com.app4080.eldercareserver.service.Impl;
+
 import com.app4080.eldercareserver.config.accessConfig;
 import com.app4080.eldercareserver.entity.User;
 import com.app4080.eldercareserver.repository.UserRepository;
@@ -8,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -22,12 +24,11 @@ public class UserService {
     }
 
     private void validatePrivileges(User currentUser, String requiredPrivilege) throws AccessDeniedException {
-
         Integer currentAccess = accessConfig.getTier(currentUser.getPrivileges());
         int requiredAccess = accessConfig.getTier(requiredPrivilege);
 
-        if(currentAccess.equals(5)){
-            //overseer has full access
+        if (currentAccess.equals(5)) {
+            // Overseer has full access
             return;
         }
 
@@ -38,7 +39,6 @@ public class UserService {
 
     @Transactional
     public User createUser(User user) throws IllegalArgumentException {
-
         // Validate unique constraints
         if (userRepository.existsByUsername(user.getUsername())) {
             throw new IllegalArgumentException("Username already exists");
@@ -51,11 +51,10 @@ public class UserService {
     }
 
     @Transactional
-    public User updateInfo(User user) throws IllegalArgumentException{
-        if(!userRepository.existsByUsername(user.getUsername())){
+    public User updateInfo(User user) throws IllegalArgumentException {
+        if (!userRepository.existsByUsername(user.getUsername())) {
             throw new IllegalArgumentException("Username does not exist");
         }
-
         return userRepository.save(user);
     }
 
@@ -64,7 +63,6 @@ public class UserService {
         if (!userRepository.existsByUsername(user.getUsername())) {
             throw new IllegalArgumentException("Username does not exist");
         }
-
         userRepository.delete(user);
     }
 
@@ -72,12 +70,54 @@ public class UserService {
     public int login(@org.jetbrains.annotations.NotNull User user) throws AccessDeniedException {
         Optional<User> existing = userRepository.findByUsername(user.getUsername());
 
-        if (existing.isEmpty()) { throw new AccessDeniedException("Username not found"); }
+        if (existing.isEmpty()) {
+            throw new AccessDeniedException("Username not found");
+        }
 
         if (user.getPassword().equals(existing.get().getPassword())) {
             return 0;
         } else {
             throw new AccessDeniedException("Invalid password");
         }
+    }
+
+    // Find a user by username
+    public Optional<User> findUserByUsername(String username) {
+        return userRepository.findByUsername(username);
+    }
+
+    // Find users by role
+    public List<User> findUsersByRole(String role) {
+        return userRepository.findByRole(role);
+    }
+
+    // Find users by privileges
+    public List<User> findUsersByPrivileges(String privileges) {
+        return userRepository.findByPrivileges(privileges);
+    }
+
+    // Find users by email
+    public List<User> findUsersByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
+
+    // Find users by primary location
+    public List<User> findUsersByPrimaryLocation(String primaryLocation) {
+        return userRepository.findByPrimaryLocation(primaryLocation);
+    }
+
+    // Find users by secondary location
+    public List<User> findUsersBySecondaryLocation(String secondaryLocation) {
+        return userRepository.findBySecondaryLocation(secondaryLocation);
+    }
+
+    // Find users by role and privileges
+    public List<User> findUsersByRoleAndPrivileges(String role, String privileges) {
+        return userRepository.findByRoleAndPrivileges(role, privileges);
+    }
+
+    // Search for users by term in username, email, or phone number
+    public List<User> searchUsers(String searchTerm) {
+        return userRepository.searchUsers(searchTerm);
     }
 }
