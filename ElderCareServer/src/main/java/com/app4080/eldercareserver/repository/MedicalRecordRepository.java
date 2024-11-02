@@ -1,7 +1,6 @@
 package com.app4080.eldercareserver.repository;
 
 import com.app4080.eldercareserver.entity.MedicalRecord;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -19,7 +18,6 @@ public interface MedicalRecordRepository extends JpaRepository<MedicalRecord, Lo
     List<MedicalRecord> findByDoctorIdAndDateOfVisit(Long doctorId, LocalDateTime dateOfVisit);
 
     @Override
-    @NotNull
     List<MedicalRecord> findAll();
 
     List<MedicalRecord> findByLocation(String location);

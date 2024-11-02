@@ -12,7 +12,7 @@ import java.util.List;
 
 @Repository
 public interface PrescriptionRepository extends JpaRepository<Prescription, Long> {
-    List<Prescription> findByRecordId(Long recordId);
+    // List<Prescription> findByRecordId(Long recordId);
     List<Prescription> findByDoctorId(Long doctorId);
     List<Prescription> findByMedicationId(Long medicationId);
 
@@ -24,6 +24,6 @@ public interface PrescriptionRepository extends JpaRepository<Prescription, Long
     List<Prescription> findByIssuedDateBetween(LocalDate startDate, LocalDate endDate);
 
     // Find prescriptions for a specific patient
-    @Query("SELECT p FROM Prescription p JOIN p.medicalRecord mr WHERE mr.patientId = :patientId")
-    List<Prescription> findByPatientId(@Param("patientId") Long patientId);
+//    @Query("SELECT p FROM Prescription p JOIN p.medicalRecord mr WHERE mr.patientId = :patientId")
+//    List<Prescription> findByPatientId(@Param("patientId") Long patientId);
 }

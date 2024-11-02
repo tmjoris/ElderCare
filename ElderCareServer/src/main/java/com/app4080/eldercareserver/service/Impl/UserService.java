@@ -67,7 +67,7 @@ public class UserService {
     }
 
     // 0 for success, -1 for failure
-    public int login(@org.jetbrains.annotations.NotNull User user) throws AccessDeniedException {
+    public int login(User user) throws AccessDeniedException {
         Optional<User> existing = userRepository.findByUsername(user.getUsername());
 
         if (existing.isEmpty()) {

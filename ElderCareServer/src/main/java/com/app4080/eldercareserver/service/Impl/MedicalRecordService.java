@@ -22,6 +22,14 @@ public class MedicalRecordService {
         this.medicalRecordRepository = medicalRecordRepository;
     }
 
+    public boolean checkExists(MedicalRecord medicalRecord) {
+        return medicalRecordRepository.existsById(medicalRecord.getId());
+    }
+
+    public MedicalRecord addMedicalRecord(MedicalRecord medicalRecord) {
+        return medicalRecordRepository.save(medicalRecord);
+    }
+
     public List<MedicalRecord> getAllMedicalRecords() {
         return medicalRecordRepository.findAll();
     }
