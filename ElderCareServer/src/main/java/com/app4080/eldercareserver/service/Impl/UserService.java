@@ -23,18 +23,24 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    private void validatePrivileges(User currentUser, String requiredPrivilege) throws AccessDeniedException {
+    private boolean validatePrivileges(User currentUser, String requiredPrivilege) throws AccessDeniedException {
         Integer currentAccess = accessConfig.getTier(currentUser.getPrivileges());
         int requiredAccess = accessConfig.getTier(requiredPrivilege);
 
         if (currentAccess.equals(5)) {
             // Overseer has full access
-            return;
+            return true;
         }
 
         if (currentAccess < requiredAccess) {
             throw new AccessDeniedException("Insufficient privileges");
+        } else {
+            return true;
         }
+    }
+
+    private boolean validateRole(User currentUser, List<String> requiredRole){
+        return requiredRole.contains(currentUser.getRole());
     }
 
     @Transactional

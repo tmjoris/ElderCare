@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface ProgressReportRepository extends JpaRepository<ProgressReport, Long> {
@@ -13,7 +13,7 @@ public interface ProgressReportRepository extends JpaRepository<ProgressReport, 
     List<ProgressReport> findByCaregiverId(Long caregiverId);
 
     // Find reports by date range
-    List<ProgressReport> findByDateBetween(LocalDate startDate, LocalDate endDate);
+    List<ProgressReport> findByDateBetween(LocalDateTime startDate, LocalDateTime endDate);
 
 //    // Find latest report for each patient
 //    @Query("SELECT pr FROM ProgressReport pr WHERE pr.date = " +
