@@ -8,10 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @Transactional
@@ -78,7 +76,31 @@ public class AppointmentService {
         return appointmentRepository.findByPatientId(patient.getId());
     }
 
-    public List<Appointment> getAppointmentBYLocation(String location){
+    public List<Appointment> getAppointmentByLocation(String location){
         return appointmentRepository.findByLocation(location);
+    }
+
+    public List<Appointment> getAppointmentByStatus(String status){
+        return appointmentRepository.findByStatus(status);
+    }
+
+    public List<Appointment> getAppointmentByPatientAndStatus(Patient patient, String status){
+        return appointmentRepository.findByPatientIdAndStatus(patient.getId(), status);
+    }
+
+    public List<Appointment> getAppointmentByDoctorAndStatus(User doctor, String status){
+        return appointmentRepository.findByDoctorIdAndStatus(doctor.getId(), status);
+    }
+
+    public List<Appointment> getAppointmentByPatientAndDoctor(Patient patient, User doctor){
+        return appointmentRepository.findByPatientIdAndDoctorId(patient.getId(), doctor.getId());
+    }
+
+    public List<Appointment> getAppointmentByLocationAndDoctor(String location, User doctor){
+        return appointmentRepository.findByLocationAndDoctorId(location, doctor.getId());
+    }
+
+    public List<Appointment> getAppointmentByDateRange(LocalDateTime start, LocalDateTime end){
+        return appointmentRepository.findByAppointmentDateBetween(start, end);
     }
 }
