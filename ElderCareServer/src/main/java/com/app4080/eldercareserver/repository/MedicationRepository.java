@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -23,9 +23,6 @@ public interface MedicationRepository extends JpaRepository<Medication, Long> {
 
     // Find medications expiring soon
     @Query("SELECT m FROM Medication m WHERE m.endDate BETWEEN CURRENT_DATE AND :date")
-    List<Medication> findMedicationsExpiringSoon(@Param("date") LocalDate date);
+    List<Medication> findMedicationsExpiringSoon(@Param("date") LocalDateTime date);
 
-    // Find medications by record and date range
-    List<Medication> findByRecordIdAndStartDateBetween(
-            Long recordId, LocalDate startDate, LocalDate endDate);
 }
