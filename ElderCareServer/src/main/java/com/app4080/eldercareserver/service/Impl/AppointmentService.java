@@ -15,14 +15,15 @@ import java.util.List;
 @Transactional
 public class AppointmentService {
 
-    @Autowired
-    private AppointmentRepository appointmentRepository;
+
+    private final AppointmentRepository appointmentRepository;
+    private final PatientService patientService;
 
     @Autowired
-    private PatientService patientService;
-
-    public AppointmentService(AppointmentRepository appointmentRepository) {
+    public AppointmentService(AppointmentRepository appointmentRepository,
+                              PatientService patientService) {
         this.appointmentRepository = appointmentRepository;
+        this.patientService = patientService;
     }
 
     public boolean checkDocExists(User doctor) throws IllegalArgumentException{
