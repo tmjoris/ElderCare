@@ -1,7 +1,6 @@
 package com.app4080.eldercareserver.service.Impl;
 
 import com.app4080.eldercareserver.config.accessConfig;
-import com.app4080.eldercareserver.entity.MedicalRecord;
 import com.app4080.eldercareserver.entity.Patient;
 import com.app4080.eldercareserver.entity.User;
 import com.app4080.eldercareserver.repository.PatientRepository;
@@ -11,7 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.file.AccessDeniedException;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -30,10 +28,12 @@ public class PatientService {
                 .isEmpty();
     }
 
+    @Transactional(readOnly = true)
     public List<Patient> getAllPatients() {
         return patientRepository.findAll();
     }
 
+    @Transactional
     public Patient createPatient(Patient patient) throws IllegalArgumentException {
         if (checkExists(patient)){
             throw new IllegalArgumentException("Patient already exists");
@@ -44,6 +44,7 @@ public class PatientService {
         return patientRepository.save(patient);
     }
 
+    @Transactional
     public void deletePatient(Patient patient, User user) throws IllegalArgumentException, AccessDeniedException {
         if (accessConfig.getTier(user.getPrivileges()) < 3) {
             throw new AccessDeniedException("Access denied");
@@ -54,5 +55,25 @@ public class PatientService {
         }
 
         patientRepository.delete(patient);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Patient> findPatientByFirstAndLastName(String firstName, String lastName) {
+        return patientRepository.findByFirstNameAndLastName(firstName, lastName);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Patient> findPatientByLastName(String lastName) {
+        return patientRepository.findByLastName(lastName);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Patient> keywordSearch(String keyword) {
+        return patientRepository.searchPatients(keyword);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Patient> findPatientsByAgeRange(int minAge, int maxAge) {
+        return patientRepository.findByAgeRange(minAge, maxAge);
     }
 }

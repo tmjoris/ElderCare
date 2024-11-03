@@ -30,18 +30,22 @@ public class ProgressReportService {
         this.userRepository = userRepository;
     }
 
+    @Transactional
     public ProgressReport createProgressReport(ProgressReport progressReport) {
         return progressReportRepository.save(progressReport);
     }
 
+    @Transactional
     public void deleteProgressReport(ProgressReport progressReport) {
         progressReportRepository.delete(progressReport);
     }
 
+    @Transactional(readOnly = true)
     public List<ProgressReport> getAllProgressReports() {
         return progressReportRepository.findAll();
     }
 
+    @Transactional(readOnly = true)
     public List<ProgressReport> getPRbyPatient(Patient patient){
         if(patientRepository.existsById(patient.getId())){
             return progressReportRepository.findByPatientId(patient.getId());
@@ -50,6 +54,7 @@ public class ProgressReportService {
         }
     }
 
+    @Transactional(readOnly = true)
     public List<ProgressReport> getPRbyCaregiver(User nurse){
         if(userRepository.existsById(nurse.getId())){
             return progressReportRepository.findByCaregiverId(nurse.getId());
@@ -58,10 +63,12 @@ public class ProgressReportService {
         }
     }
 
+    @Transactional(readOnly = true)
     public List<ProgressReport> findPRbyRange(LocalDateTime start, LocalDateTime end){
         return progressReportRepository.findByDateBetween(start, end);
     }
 
+    @Transactional(readOnly = true)
     public List<ProgressReport> keywordSearch(String keyword){
         return progressReportRepository.searchReports(keyword);
     }
