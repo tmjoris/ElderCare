@@ -26,38 +26,47 @@ public class MedicalRecordService {
         return medicalRecordRepository.existsById(medicalRecord.getId());
     }
 
+    @Transactional
     public MedicalRecord addMedicalRecord(MedicalRecord medicalRecord) {
         return medicalRecordRepository.save(medicalRecord);
     }
 
+    @Transactional(readOnly = true)
     public List<MedicalRecord> getAllMedicalRecords() {
         return medicalRecordRepository.findAll();
     }
 
+    @Transactional(readOnly = true)
     public List<MedicalRecord> getMedicalRecordsByPatient(Patient patient){
         return medicalRecordRepository.findByPatientId(patient.getId());
     }
 
+    @Transactional(readOnly = true)
     public List<MedicalRecord> getMedicalRecordsByDoctor(User doctor){
         return medicalRecordRepository.findByDoctorId(doctor.getId());
     }
 
+    @Transactional(readOnly = true)
     public List<MedicalRecord> getMedicalRecordsByPatientAndDoctor(Patient patient, User doctor){
         return medicalRecordRepository.findByPatientIdAndDoctorId(patient.getId(), doctor.getId());
     }
 
+    @Transactional(readOnly = true)
     public List<MedicalRecord> getMedicalRecordsByDoctorAndDate(User doctor, LocalDateTime date){
         return medicalRecordRepository.findByDoctorIdAndDateOfVisit(doctor.getId(), date);
     }
 
+    @Transactional(readOnly = true)
     public List<MedicalRecord> getMedicalRecordsByLocation(String location){
         return medicalRecordRepository.findByLocation(location);
     }
 
+    @Transactional(readOnly = true)
     public List<MedicalRecord> getMedicalRecordsByRange(LocalDateTime start, LocalDateTime end){
         return medicalRecordRepository.findByDateOfVisitBetween(start, end);
     }
 
+    @Transactional(readOnly = true)
     public List<MedicalRecord> getMedicalRecordsByDateAndLocation(LocalDateTime date, String location){
         return medicalRecordRepository.findByDateOfVisitAndLocation(date, location);
     }

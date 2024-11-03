@@ -24,14 +24,17 @@ public class MedicationService {
         this.medicalRecordService = medicalRecordService;
     }
 
+    @Transactional
     public Medication addMedication(Medication medication) {
         return medicationRepository.save(medication);
     }
 
+    @Transactional(readOnly = true)
     public List<Medication> getAllMedications() {
         return medicationRepository.findAll();
     }
 
+    @Transactional(readOnly = true)
     public List<Medication> getMedicalRecord(MedicalRecord mr) throws IllegalArgumentException{
         if(!medicalRecordService.checkExists(mr)){
             throw new IllegalArgumentException("Medical record does not exist");
@@ -39,6 +42,7 @@ public class MedicationService {
         return medicationRepository.findByMedicalRecord(mr);
     }
 
+    @Transactional
     public void deleteMedication(Medication medication) throws IllegalArgumentException{
         if(medicationRepository.existsById(medication.getId())){
             medicationRepository.deleteById(medication.getId());
@@ -47,14 +51,17 @@ public class MedicationService {
         }
     }
 
+    @Transactional(readOnly = true)
     public List<Medication> findAllActiveMedications() {
         return medicationRepository.findActiveMedications();
     }
 
+    @Transactional(readOnly = true)
     public List<Medication> findByName(String name) {
         return medicationRepository.findByMedicationNameContainingIgnoreCase(name);
     }
 
+    @Transactional(readOnly = true)
     public List<Medication> findMedicationsExpiringSoon(){
         return medicationRepository.findMedicationsExpiringSoon(LocalDateTime.now());
     }

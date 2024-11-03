@@ -16,9 +16,10 @@ import java.util.List;
 @Transactional
 public class PatientService {
 
-    @Autowired
+
     private final PatientRepository patientRepository;
 
+    @Autowired
     public PatientService(PatientRepository patientRepository) {
         this.patientRepository = patientRepository;
     }
