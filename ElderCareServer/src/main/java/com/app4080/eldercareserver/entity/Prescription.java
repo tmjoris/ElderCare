@@ -1,7 +1,8 @@
 package com.app4080.eldercareserver.entity;
 
 import jakarta.persistence.*;
-import java.time.LocalDate;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "prescriptions")
@@ -27,10 +28,10 @@ public class Prescription {
     private String instructions;
 
     @Column(name = "issued_date", nullable = false)
-    private LocalDate issuedDate;
+    private LocalDateTime issuedDate;
 
     @Column(name = "created_at", nullable = false)
-    private LocalDate createdAt;
+    private LocalDateTime createdAt;
 
     // Constructors, Getters, Setters
     public Prescription() {}
@@ -75,19 +76,19 @@ public class Prescription {
         this.instructions = instructions;
     }
 
-    public LocalDate getIssuedDate() {
+    public LocalDateTime getIssuedDate() {
         return issuedDate;
     }
 
-    public void setIssuedDate(LocalDate issuedDate) {
+    public void setIssuedDate(LocalDateTime issuedDate) {
         this.issuedDate = issuedDate;
     }
 
-    public LocalDate getCreatedAt() {
+    public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(LocalDate createdAt) {
+    public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
 }
