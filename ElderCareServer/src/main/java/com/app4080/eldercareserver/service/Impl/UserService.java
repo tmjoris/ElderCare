@@ -3,6 +3,7 @@ package com.app4080.eldercareserver.service.Impl;
 import com.app4080.eldercareserver.config.accessConfig;
 import com.app4080.eldercareserver.dto.user.UserRegistrationRequest;
 import com.app4080.eldercareserver.dto.user.UserResponse;
+import com.app4080.eldercareserver.dto.user.UserUpdateRequest;
 import com.app4080.eldercareserver.entity.User;
 import com.app4080.eldercareserver.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,11 +87,18 @@ public class UserService {
     }
 
     @Transactional
-    public User updateInfo(User user) throws IllegalArgumentException {
-        if (!userRepository.existsByUsername(user.getUsername())) {
-            throw new IllegalArgumentException("Username does not exist");
-        }
-        return userRepository.save(user);
+    public UserResponse updateUser(Long id, UserUpdateRequest updateRequest) {
+        User user = userRepository.findById(id).orElseThrow(()
+                -> new IllegalArgumentException("User not found"));
+        user.setEmail(updateRequest.getEmail());
+        user.setPrimaryLocation(updateRequest.getPrimaryLocation());
+        user.setSecondaryLocation(updateRequest.getSecondaryLocation());
+        user.setPhoneNumber(updateRequest.getPhoneNumber());
+        user.setRole(updateRequest.getRole());
+        user.setPrivileges(updateRequest.getPrivileges());
+
+        user = userRepository.save(user);
+        return convertToResponse(user);
     }
 
     @Transactional
