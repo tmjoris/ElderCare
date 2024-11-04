@@ -1,5 +1,7 @@
 package com.app4080.eldercareserver.controller;
 
+import com.app4080.eldercareserver.dto.user.UserRegistrationRequest;
+import com.app4080.eldercareserver.dto.user.UserResponse;
 import com.app4080.eldercareserver.entity.User;
 import com.app4080.eldercareserver.service.Impl.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,14 +20,10 @@ public class UserController {
         this.userService = userService;
     }
 
-    @PostMapping("/create")
-    public ResponseEntity<?> createUser(@RequestBody User user) {
-        try{
-            User createdUser = userService.createUser(user);
-            return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
-        }
+    @PostMapping("/register")
+    public ResponseEntity<UserResponse> registerUser(@RequestBody UserRegistrationRequest registrationRequest) {
+        UserResponse userResponse = userService.registerUser(registrationRequest);
+        return ResponseEntity.status(HttpStatus.CREATED).body(userResponse);
     }
 
     @DeleteMapping("/delete")

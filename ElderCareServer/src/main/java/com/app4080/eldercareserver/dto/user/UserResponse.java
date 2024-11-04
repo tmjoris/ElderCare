@@ -26,6 +26,10 @@ public class UserResponse {
         this.createdAt = createdAt;
     }
 
+    public UserResponse() {
+
+    }
+
     public Long getId() {
         return id;
     }

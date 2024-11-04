@@ -1,6 +1,8 @@
 package com.app4080.eldercareserver.service.Impl;
 
 import com.app4080.eldercareserver.config.accessConfig;
+import com.app4080.eldercareserver.dto.user.UserRegistrationRequest;
+import com.app4080.eldercareserver.dto.user.UserResponse;
 import com.app4080.eldercareserver.entity.User;
 import com.app4080.eldercareserver.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,17 +45,44 @@ public class UserService {
         return requiredRole.contains(currentUser.getRole());
     }
 
+    private UserResponse convertToResponse(User user) {
+        UserResponse response = new UserResponse();
+        response.setId(user.getId());
+        response.setUsername(user.getUsername());
+        response.setEmail(user.getEmail());
+        response.setPrimaryLocation(user.getPrimaryLocation());
+        response.setSecondaryLocation(user.getSecondaryLocation());
+        response.setPhoneNumber(user.getPhoneNumber());
+        response.setRole(user.getRole());
+        response.setPrivileges(user.getPrivileges());
+        response.setCreatedAt(user.getCreatedAt());
+        return response;
+    }
+
     @Transactional
-    public User createUser(User user) throws IllegalArgumentException {
+    public UserResponse registerUser(UserRegistrationRequest registrationRequest) throws IllegalArgumentException {
         // Validate unique constraints
-        if (userRepository.existsByUsername(user.getUsername())) {
+        if (userRepository.existsByUsername(registrationRequest.getUsername())) {
             throw new IllegalArgumentException("Username already exists");
         }
-        if (userRepository.existsByEmail(user.getEmail())) {
+        if (userRepository.existsByEmail(registrationRequest.getEmail())) {
             throw new IllegalArgumentException("Email already exists");
         }
+
+        User user = new User();
+        user.setUsername(registrationRequest.getUsername());
+        user.setPassword(registrationRequest.getPassword()); // Remember to hash the password!
+        user.setEmail(registrationRequest.getEmail());
+        user.setPrimaryLocation(registrationRequest.getPrimaryLocation());
+        user.setSecondaryLocation(registrationRequest.getSecondaryLocation());
+        user.setPhoneNumber(registrationRequest.getPhoneNumber());
+        user.setRole(registrationRequest.getRole());
+        user.setPrivileges(registrationRequest.getPrivileges());
         user.setCreatedAt(LocalDateTime.now());
-        return userRepository.save(user);
+
+        user = userRepository.save(user);
+
+        return convertToResponse(user);
     }
 
     @Transactional
