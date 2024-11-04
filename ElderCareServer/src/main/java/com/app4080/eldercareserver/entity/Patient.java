@@ -40,9 +40,11 @@ public class Patient {
     private LocalDateTime createdAt;
 
     // Constructors, Getters, Setters
-    public Patient(){
+    public Patient(Long patientId){
 
     }
+
+    public Patient(){}
 
     public Long getId() {
         return id;

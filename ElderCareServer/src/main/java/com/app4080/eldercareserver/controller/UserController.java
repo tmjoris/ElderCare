@@ -4,7 +4,7 @@ import com.app4080.eldercareserver.dto.user.UserRegistrationRequest;
 import com.app4080.eldercareserver.dto.user.UserResponse;
 import com.app4080.eldercareserver.dto.user.UserUpdateRequest;
 import com.app4080.eldercareserver.dto.user.LoginRequest;
-import com.app4080.eldercareserver.service.Impl.UserService;
+import com.app4080.eldercareserver.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

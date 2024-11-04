@@ -1,4 +1,4 @@
-package com.app4080.eldercareserver.service.Impl;
+package com.app4080.eldercareserver.service;
 
 import com.app4080.eldercareserver.entity.MedicalRecord;
 import com.app4080.eldercareserver.entity.Medication;

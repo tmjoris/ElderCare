@@ -1,4 +1,4 @@
-package com.app4080.eldercareserver.service.Impl;
+package com.app4080.eldercareserver.service;
 
 import com.app4080.eldercareserver.config.accessConfig;
 import com.app4080.eldercareserver.dto.patient.*;

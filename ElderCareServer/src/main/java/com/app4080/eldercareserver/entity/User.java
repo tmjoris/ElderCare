@@ -63,6 +63,10 @@ public class User {
 
     }
 
+    public User(Long userId) {
+
+    }
+
     public Long getId() {
         return id;
     }
