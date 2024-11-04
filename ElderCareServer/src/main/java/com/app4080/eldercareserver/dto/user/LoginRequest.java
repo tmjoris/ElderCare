@@ -1,10 +1,10 @@
 package com.app4080.eldercareserver.dto.user;
 
-public class loginRequest {
+public class LoginRequest {
     private String username;
     private String password;
 
-    public loginRequest(String username, String password) {
+    public LoginRequest(String username, String password) {
         this.username = username;
         this.password = password;
     }

@@ -4,7 +4,7 @@ import com.app4080.eldercareserver.config.accessConfig;
 import com.app4080.eldercareserver.dto.user.UserRegistrationRequest;
 import com.app4080.eldercareserver.dto.user.UserResponse;
 import com.app4080.eldercareserver.dto.user.UserUpdateRequest;
-import com.app4080.eldercareserver.dto.user.loginRequest;
+import com.app4080.eldercareserver.dto.user.LoginRequest;
 import com.app4080.eldercareserver.entity.User;
 import com.app4080.eldercareserver.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +15,7 @@ import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -103,7 +104,7 @@ public class UserService {
     }
 
     @Transactional
-    public void deleteUser(loginRequest lr) throws IllegalArgumentException {
+    public void deleteUser(LoginRequest lr) throws IllegalArgumentException {
         Optional<User> user = userRepository.findByUsername(lr.getUsername());
 
         if (user.isEmpty()) {throw new IllegalArgumentException("User not found");}
@@ -112,7 +113,7 @@ public class UserService {
     }
 
     // 0 for success, -1 for failure
-    public int login(loginRequest loginRequest) throws AccessDeniedException, IllegalArgumentException {
+    public int login(LoginRequest loginRequest) throws AccessDeniedException, IllegalArgumentException {
         Optional<User> existing = userRepository.findByUsername(loginRequest.getUsername());
 
         if (existing.isEmpty()) {
@@ -128,49 +129,63 @@ public class UserService {
 
     // Find a user by username
     @Transactional(readOnly = true)
-    public Optional<User> findUserByUsername(String username) {
-        return userRepository.findByUsername(username);
+    public Optional<UserResponse> findUserByUsername(String username) {
+        return userRepository.findByUsername(username).map(this::convertToResponse);
     }
 
     // Find users by role
     @Transactional(readOnly = true)
-    public List<User> findUsersByRole(String role) {
-        return userRepository.findByRole(role);
+    public List<UserResponse> findUsersByRole(String role) {
+        return userRepository.findByRole(role).stream()
+                .map(this::convertToResponse)
+                .collect(Collectors.toList());
     }
 
     // Find users by privileges
     @Transactional(readOnly = true)
-    public List<User> findUsersByPrivileges(String privileges) {
-        return userRepository.findByPrivileges(privileges);
+    public List<UserResponse> findUsersByPrivileges(String privileges) {
+        return userRepository.findByPrivileges(privileges).stream()
+                .map(this::convertToResponse)
+                .collect(Collectors.toList());
     }
 
     // Find users by email
     @Transactional(readOnly = true)
-    public List<User> findUsersByEmail(String email) {
-        return userRepository.findByEmail(email);
+    public List<UserResponse> findUsersByEmail(String email) {
+        return userRepository.findByEmail(email).stream()
+                .map(this::convertToResponse)
+                .collect(Collectors.toList());
     }
 
     // Find users by primary location
     @Transactional(readOnly = true)
-    public List<User> findUsersByPrimaryLocation(String primaryLocation) {
-        return userRepository.findByPrimaryLocation(primaryLocation);
+    public List<UserResponse> findUsersByPrimaryLocation(String primaryLocation) {
+        return userRepository.findByPrimaryLocation(primaryLocation).stream()
+                .map(this::convertToResponse)
+                .collect(Collectors.toList());
     }
 
     // Find users by secondary location
     @Transactional(readOnly = true)
-    public List<User> findUsersBySecondaryLocation(String secondaryLocation) {
-        return userRepository.findBySecondaryLocation(secondaryLocation);
+    public List<UserResponse> findUsersBySecondaryLocation(String secondaryLocation) {
+        return userRepository.findBySecondaryLocation(secondaryLocation).stream()
+                .map(this::convertToResponse)
+                .collect(Collectors.toList());
     }
 
     // Find users by role and privileges
     @Transactional(readOnly = true)
-    public List<User> findUsersByRoleAndPrivileges(String role, String privileges) {
-        return userRepository.findByRoleAndPrivileges(role, privileges);
+    public List<UserResponse> findUsersByRoleAndPrivileges(String role, String privileges) {
+        return userRepository.findByRoleAndPrivileges(role, privileges).stream()
+                .map(this::convertToResponse)
+                .collect(Collectors.toList());
     }
 
     // Search for users by term in username, email, or phone number
     @Transactional(readOnly = true)
-    public List<User> searchUsers(String searchTerm) {
-        return userRepository.searchUsers(searchTerm);
+    public List<UserResponse> searchUsers(String searchTerm) {
+        return userRepository.searchUsers(searchTerm).stream()
+                .map(this::convertToResponse)
+                .collect(Collectors.toList());
     }
 }
