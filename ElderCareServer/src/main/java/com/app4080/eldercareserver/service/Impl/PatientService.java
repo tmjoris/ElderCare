@@ -1,6 +1,7 @@
 package com.app4080.eldercareserver.service.Impl;
 
 import com.app4080.eldercareserver.config.accessConfig;
+import com.app4080.eldercareserver.dto.patient.*;
 import com.app4080.eldercareserver.entity.Patient;
 import com.app4080.eldercareserver.entity.User;
 import com.app4080.eldercareserver.repository.PatientRepository;
@@ -11,11 +12,11 @@ import org.springframework.transaction.annotation.Transactional;
 import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
 public class PatientService {
-
 
     private final PatientRepository patientRepository;
 
@@ -24,57 +25,116 @@ public class PatientService {
         this.patientRepository = patientRepository;
     }
 
-    public boolean checkExists(Patient patient) {
-        return !patientRepository.findByFirstNameAndLastName(patient.getFirstName(), patient.getLastName())
-                .isEmpty();
+    // Conversion Methods
+
+    private PatientResponse convertToResponseDto(Patient patient) {
+        PatientResponse dto = new PatientResponse();
+        dto.setId(patient.getId());
+        dto.setFirstName(patient.getFirstName());
+        dto.setLastName(patient.getLastName());
+        dto.setDob(patient.getDob());
+        dto.setGender(patient.getGender());
+        dto.setAddress(patient.getAddress());
+        dto.setPhoneNumber(patient.getPhoneNumber());
+        dto.setEmergencyContact(patient.getEmergencyContact());
+        dto.setEmergencyContactPhone(patient.getEmergencyContactPhone());
+        dto.setCreatedAt(patient.getCreatedAt());
+        return dto;
     }
 
-    @Transactional(readOnly = true)
-    public List<Patient> getAllPatients() {
-        return patientRepository.findAll();
+    private Patient convertToEntity(PatientRequest dto) {
+        Patient patient = new Patient();
+        patient.setFirstName(dto.getFirstName());
+        patient.setLastName(dto.getLastName());
+        patient.setDob(dto.getDob());
+        patient.setGender(dto.getGender());
+        patient.setAddress(dto.getAddress());
+        patient.setPhoneNumber(dto.getPhoneNumber());
+        patient.setEmergencyContact(dto.getEmergencyContact());
+        patient.setEmergencyContactPhone(dto.getEmergencyContactPhone());
+        patient.setCreatedAt(LocalDateTime.now());
+        return patient;
     }
+
+    private PatientSummary convertToSummaryDto(Patient patient) {
+        PatientSummary dto = new PatientSummary();
+        dto.setId(patient.getId());
+        dto.setFirstName(patient.getFirstName());
+        dto.setLastName(patient.getLastName());
+        dto.setPhoneNumber(patient.getPhoneNumber());
+        return dto;
+    }
+
+    private PatientSearch convertToSearchDto(Patient patient) {
+        PatientSearch dto = new PatientSearch();
+        dto.setId(patient.getId());
+        dto.setFirstName(patient.getFirstName());
+        dto.setLastName(patient.getLastName());
+        dto.setDob(patient.getDob());
+        dto.setGender(patient.getGender());
+        dto.setPhoneNumber(patient.getPhoneNumber());
+        return dto;
+    }
+
+    // Service Methods
 
     @Transactional
-    public Patient createPatient(Patient patient) throws IllegalArgumentException {
-        if (checkExists(patient)){
+    public PatientResponse createPatient(PatientRequest requestDto) throws IllegalArgumentException {
+        Patient patient = convertToEntity(requestDto);
+
+        if (checkExists(patient)) {
             throw new IllegalArgumentException("Patient already exists");
         }
 
-        patient.setCreatedAt(LocalDateTime.now());
+        Patient savedPatient = patientRepository.save(patient);
+        return convertToResponseDto(savedPatient);
+    }
 
-        return patientRepository.save(patient);
+    @Transactional(readOnly = true)
+    public List<PatientResponse> getAllPatients() {
+        return patientRepository.findAll()
+                .stream()
+                .map(this::convertToResponseDto)
+                .collect(Collectors.toList());
     }
 
     @Transactional
-    public void deletePatient(Patient patient, User user) throws IllegalArgumentException, AccessDeniedException {
+    public void deletePatient(Long patientId, User user) throws IllegalArgumentException, AccessDeniedException {
+        Patient patient = patientRepository.findById(patientId)
+                .orElseThrow(() -> new IllegalArgumentException("Patient does not exist"));
+
         if (accessConfig.getTier(user.getPrivileges()) < 3) {
             throw new AccessDeniedException("Access denied");
-        }
-
-        if (!checkExists(patient)){
-            throw new IllegalArgumentException("Patient does not exist");
         }
 
         patientRepository.delete(patient);
     }
 
     @Transactional(readOnly = true)
-    public List<Patient> findPatientByFirstAndLastName(String firstName, String lastName) {
-        return patientRepository.findByFirstNameAndLastName(firstName, lastName);
+    public List<PatientSummary> findPatientByLastName(String lastName) {
+        return patientRepository.findByLastName(lastName)
+                .stream()
+                .map(this::convertToSummaryDto)
+                .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
-    public List<Patient> findPatientByLastName(String lastName) {
-        return patientRepository.findByLastName(lastName);
+    public List<PatientSearch> keywordSearch(String keyword) {
+        return patientRepository.searchPatients(keyword)
+                .stream()
+                .map(this::convertToSearchDto)
+                .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
-    public List<Patient> keywordSearch(String keyword) {
-        return patientRepository.searchPatients(keyword);
+    public List<PatientSearch> findPatientsByAgeRange(int minAge, int maxAge) {
+        return patientRepository.findByAgeRange(minAge, maxAge)
+                .stream()
+                .map(this::convertToSearchDto)
+                .collect(Collectors.toList());
     }
 
-    @Transactional(readOnly = true)
-    public List<Patient> findPatientsByAgeRange(int minAge, int maxAge) {
-        return patientRepository.findByAgeRange(minAge, maxAge);
+    private boolean checkExists(Patient patient) {
+        return !patientRepository.findByFirstNameAndLastName(patient.getFirstName(), patient.getLastName()).isEmpty();
     }
 }
