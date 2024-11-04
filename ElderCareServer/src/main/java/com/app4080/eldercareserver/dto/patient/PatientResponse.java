@@ -1,48 +1,21 @@
-package com.app4080.eldercareserver.entity;
+package com.app4080.eldercareserver.dto.patient;
 
-import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "patients")
-public class Patient {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class PatientResponse {
     private Long id;
-
-    @Column(name = "first_name", nullable = false, length = 100)
     private String firstName;
-
-    @Column(name = "last_name", nullable = false, length = 100)
     private String lastName;
-
-    @Column(name = "dob", nullable = false)
     private LocalDate dob;
-
-    @Column(name = "gender", nullable = false, length = 10)
     private String gender;
-
-    @Column(name = "address", nullable = false, length = 250)
     private String address;
-
-    @Column(name = "phone_number", length = 20)
     private String phoneNumber;
-
-    @Column(name = "emergency_contact", length = 100)
     private String emergencyContact;
-
-    @Column(name = "emergency_contact_phone", length = 20)
     private String emergencyContactPhone;
-
-    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    // Constructors, Getters, Setters
-    public Patient(){
-
-    }
+    public PatientResponse() {}
 
     public Long getId() {
         return id;
@@ -124,4 +97,3 @@ public class Patient {
         this.createdAt = createdAt;
     }
 }
-

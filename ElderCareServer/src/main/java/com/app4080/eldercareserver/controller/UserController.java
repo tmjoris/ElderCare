@@ -49,7 +49,7 @@ public class UserController {
     @PostMapping("/login")
     public ResponseEntity<String> userLogin(@RequestBody LoginRequest loginRequest) {
         try {
-            int status = userService.login(loginRequest);
+            userService.login(loginRequest);
             return ResponseEntity.ok("Login successful");
         } catch (IllegalArgumentException | AccessDeniedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());

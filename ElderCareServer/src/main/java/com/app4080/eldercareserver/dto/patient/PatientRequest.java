@@ -1,56 +1,19 @@
-package com.app4080.eldercareserver.entity;
+package com.app4080.eldercareserver.dto.patient;
 
-import jakarta.persistence.*;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "patients")
-public class Patient {
+public class PatientRequest {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(name = "first_name", nullable = false, length = 100)
     private String firstName;
-
-    @Column(name = "last_name", nullable = false, length = 100)
     private String lastName;
-
-    @Column(name = "dob", nullable = false)
     private LocalDate dob;
-
-    @Column(name = "gender", nullable = false, length = 10)
     private String gender;
-
-    @Column(name = "address", nullable = false, length = 250)
     private String address;
-
-    @Column(name = "phone_number", length = 20)
     private String phoneNumber;
-
-    @Column(name = "emergency_contact", length = 100)
     private String emergencyContact;
-
-    @Column(name = "emergency_contact_phone", length = 20)
     private String emergencyContactPhone;
 
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
-
-    // Constructors, Getters, Setters
-    public Patient(){
-
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public PatientRequest() {}
 
     public String getFirstName() {
         return firstName;
@@ -115,13 +78,4 @@ public class Patient {
     public void setEmergencyContactPhone(String emergencyContactPhone) {
         this.emergencyContactPhone = emergencyContactPhone;
     }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
 }
-

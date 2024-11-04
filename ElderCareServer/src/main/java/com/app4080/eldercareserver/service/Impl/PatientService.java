@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.file.AccessDeniedException;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -40,7 +40,7 @@ public class PatientService {
             throw new IllegalArgumentException("Patient already exists");
         }
 
-        patient.setCreatedAt(LocalDate.now());
+        patient.setCreatedAt(LocalDateTime.now());
 
         return patientRepository.save(patient);
     }
