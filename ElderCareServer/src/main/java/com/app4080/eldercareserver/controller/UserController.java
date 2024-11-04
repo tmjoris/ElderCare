@@ -3,12 +3,14 @@ package com.app4080.eldercareserver.controller;
 import com.app4080.eldercareserver.dto.user.UserRegistrationRequest;
 import com.app4080.eldercareserver.dto.user.UserResponse;
 import com.app4080.eldercareserver.dto.user.UserUpdateRequest;
-import com.app4080.eldercareserver.entity.User;
+import com.app4080.eldercareserver.dto.user.loginRequest;
 import com.app4080.eldercareserver.service.Impl.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.nio.file.AccessDeniedException;
 
 @RestController
 @RequestMapping("/api/users")
@@ -34,12 +36,22 @@ public class UserController {
     }
 
     @DeleteMapping("/delete")
-    public ResponseEntity<?> deleteUser(@RequestBody User user) {
+    public ResponseEntity<?> deleteUser(@RequestBody loginRequest loginRequest) {
         try{
-            userService.deleteUser(user);
+            userService.deleteUser(loginRequest);
             return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<String> userLogin(@RequestBody loginRequest loginRequest) {
+        try{
+            int status = userService.login(loginRequest);
+            return ResponseEntity.ok("Login successful");
+        } catch (IllegalArgumentException | AccessDeniedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
     }
 }

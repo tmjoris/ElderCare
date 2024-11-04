@@ -4,6 +4,7 @@ import com.app4080.eldercareserver.config.accessConfig;
 import com.app4080.eldercareserver.dto.user.UserRegistrationRequest;
 import com.app4080.eldercareserver.dto.user.UserResponse;
 import com.app4080.eldercareserver.dto.user.UserUpdateRequest;
+import com.app4080.eldercareserver.dto.user.loginRequest;
 import com.app4080.eldercareserver.entity.User;
 import com.app4080.eldercareserver.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -102,22 +103,23 @@ public class UserService {
     }
 
     @Transactional
-    public void deleteUser(User user) throws IllegalArgumentException {
-        if (!userRepository.existsByUsername(user.getUsername())) {
-            throw new IllegalArgumentException("Username does not exist");
-        }
-        userRepository.delete(user);
+    public void deleteUser(loginRequest lr) throws IllegalArgumentException {
+        Optional<User> user = userRepository.findByUsername(lr.getUsername());
+
+        if (user.isEmpty()) {throw new IllegalArgumentException("User not found");}
+
+        userRepository.delete(user.get());
     }
 
     // 0 for success, -1 for failure
-    public int login(User user) throws AccessDeniedException {
-        Optional<User> existing = userRepository.findByUsername(user.getUsername());
+    public int login(loginRequest loginRequest) throws AccessDeniedException, IllegalArgumentException {
+        Optional<User> existing = userRepository.findByUsername(loginRequest.getUsername());
 
         if (existing.isEmpty()) {
-            throw new AccessDeniedException("Username not found");
+            throw new IllegalArgumentException("Username not found");
         }
 
-        if (user.getPassword().equals(existing.get().getPassword())) {
+        if (loginRequest.getPassword().equals(existing.get().getPassword())) {
             return 0;
         } else {
             throw new AccessDeniedException("Invalid password");
