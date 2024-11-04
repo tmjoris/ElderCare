@@ -134,7 +134,7 @@ public class PatientService {
                 .collect(Collectors.toList());
     }
 
-    private boolean checkExists(Patient patient) {
+    boolean checkExists(Patient patient) {
         return !patientRepository.findByFirstNameAndLastName(patient.getFirstName(), patient.getLastName()).isEmpty();
     }
 }

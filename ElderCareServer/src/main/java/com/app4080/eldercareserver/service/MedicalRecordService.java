@@ -120,4 +120,8 @@ public class MedicalRecordService {
                 .map(this::toResponse)
                 .collect(Collectors.toList());
     }
+
+    boolean checkExists(MedicalRecord mr) {
+        return medicalRecordRepository.existsById(mr.getId());
+    }
 }
