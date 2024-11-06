@@ -28,7 +28,7 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    private boolean validatePrivileges(User currentUser, String requiredPrivilege) throws AccessDeniedException {
+    public boolean validatePrivileges(User currentUser, String requiredPrivilege) throws AccessDeniedException {
         Integer currentAccess = accessConfig.getTier(currentUser.getPrivileges());
         int requiredAccess = accessConfig.getTier(requiredPrivilege);
 

@@ -4,7 +4,10 @@ import com.app4080.eldercareserver.dto.user.UserRegistrationRequest;
 import com.app4080.eldercareserver.dto.user.UserResponse;
 import com.app4080.eldercareserver.dto.user.UserUpdateRequest;
 import com.app4080.eldercareserver.dto.user.LoginRequest;
+import com.app4080.eldercareserver.entity.User;
+import com.app4080.eldercareserver.repository.UserRepository;
 import com.app4080.eldercareserver.service.UserService;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,10 +21,12 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
+    private final UserRepository userRepository;
 
     @Autowired
-    public UserController(UserService userService) {
+    public UserController(UserService userService, UserRepository userRepository) {
         this.userService = userService;
+        this.userRepository = userRepository;
     }
 
     @PostMapping("/register")
@@ -35,6 +40,20 @@ public class UserController {
         UserResponse userResponse = userService.updateUser(id, updateRequest);
         return ResponseEntity.ok(userResponse);
     }
+
+    @GetMapping("/{id}/validate")
+    public ResponseEntity<String> validateUserAccess(@PathVariable Long id, @RequestParam String required_access) {
+        try {
+            User user = userRepository.getReferenceById(id);
+            boolean hasAccess = userService.validatePrivileges(user, required_access);
+            return hasAccess ? ResponseEntity.ok("Access granted") : ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied");
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred");
+        }
+    }
+
 
     @DeleteMapping("/delete")
     public ResponseEntity<String> delete(@RequestBody LoginRequest loginRequest) {
