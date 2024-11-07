@@ -45,10 +45,12 @@ public class UserController {
     public ResponseEntity<String> validateUserAccess(@PathVariable Long id, @RequestParam String required_access) {
         try {
             User user = userRepository.getReferenceById(id);
-            boolean hasAccess = userService.validatePrivileges(user, required_access);
-            return hasAccess ? ResponseEntity.ok("Access granted") : ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied");
+            userService.validatePrivileges(user.getUsername(), required_access);
+            return ResponseEntity.ok("Access granted");
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        } catch (AccessDeniedException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred");
         }

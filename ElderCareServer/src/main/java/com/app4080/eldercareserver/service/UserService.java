@@ -28,17 +28,16 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public boolean validatePrivileges(User currentUser, String requiredPrivilege)
+    public void validatePrivileges(String username, String requiredPrivilege)
             throws AccessDeniedException {
-        Integer currentAccess = accessConfig.getTier(currentUser.getPrivileges());
+
+        User user = fetchUserByUsername(username);
+        int currentAccess = accessConfig.getTier(user.getPrivileges());
         int requiredAccess = accessConfig.getTier(requiredPrivilege);
 
-        if (currentAccess.equals(5)) {
-            // Overseer has full access
-            return true;
+        if (currentAccess < requiredAccess) {
+            throw new AccessDeniedException("Insufficient privileges for this operation");
         }
-
-        return currentAccess >= requiredAccess;
     }
 
     private boolean validateRole(User currentUser, List<String> requiredRole){
@@ -109,31 +108,20 @@ public class UserService {
         userRepository.delete(user.get());
     }
 
-    // 0 for success, -1 for failure
-    public int login(LoginRequest loginRequest) throws AccessDeniedException, IllegalArgumentException {
+    public void login(LoginRequest loginRequest) throws AccessDeniedException, IllegalArgumentException {
         Optional<User> existing = userRepository.findByUsername(loginRequest.getUsername());
 
         if (existing.isEmpty()) {
             throw new IllegalArgumentException("Username not found");
         }
 
-        if (loginRequest.getPassword().equals(existing.get().getPassword())) {
-            return 0;
-        } else {
-            throw new AccessDeniedException("Invalid password");
-        }
+        if (loginRequest.getPassword().equals(existing.get().getPassword())) {return;}
+
+        else {throw new AccessDeniedException("Invalid password");}
     }
 
     public User fetchUserByUsername(String username) {
         Optional<User> user = userRepository.findByUsername(username);
-
-        if (user.isEmpty()) {throw new IllegalArgumentException("User not found");}
-
-        return user.get();
-    }
-
-    public User fetchUserById(Long id) {
-        Optional<User> user = userRepository.findById(id);
 
         if (user.isEmpty()) {throw new IllegalArgumentException("User not found");}
 
