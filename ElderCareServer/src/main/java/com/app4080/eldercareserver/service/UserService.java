@@ -28,7 +28,8 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public boolean validatePrivileges(User currentUser, String requiredPrivilege) throws AccessDeniedException {
+    public boolean validatePrivileges(User currentUser, String requiredPrivilege)
+            throws AccessDeniedException {
         Integer currentAccess = accessConfig.getTier(currentUser.getPrivileges());
         int requiredAccess = accessConfig.getTier(requiredPrivilege);
 
@@ -37,11 +38,7 @@ public class UserService {
             return true;
         }
 
-        if (currentAccess < requiredAccess) {
-            throw new AccessDeniedException("Insufficient privileges");
-        } else {
-            return true;
-        }
+        return currentAccess >= requiredAccess;
     }
 
     private boolean validateRole(User currentUser, List<String> requiredRole){
@@ -125,6 +122,22 @@ public class UserService {
         } else {
             throw new AccessDeniedException("Invalid password");
         }
+    }
+
+    public User fetchUserByUsername(String username) {
+        Optional<User> user = userRepository.findByUsername(username);
+
+        if (user.isEmpty()) {throw new IllegalArgumentException("User not found");}
+
+        return user.get();
+    }
+
+    public User fetchUserById(Long id) {
+        Optional<User> user = userRepository.findById(id);
+
+        if (user.isEmpty()) {throw new IllegalArgumentException("User not found");}
+
+        return user.get();
     }
 
     // Find a user by username

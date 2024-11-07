@@ -5,7 +5,9 @@ import com.app4080.eldercareserver.dto.patient.PatientResponse;
 import com.app4080.eldercareserver.dto.patient.PatientSearch;
 import com.app4080.eldercareserver.dto.patient.PatientSummary;
 import com.app4080.eldercareserver.entity.User;
+import com.app4080.eldercareserver.repository.UserRepository;
 import com.app4080.eldercareserver.service.PatientService;
+import com.app4080.eldercareserver.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,16 +15,21 @@ import org.springframework.web.bind.annotation.*;
 
 import java.nio.file.AccessDeniedException;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/patients")
 public class PatientController {
 
     private final PatientService patientService;
+    private final UserService userService;
 
     @Autowired
-    public PatientController(PatientService patientService) {
+    public PatientController(PatientService patientService,
+                             UserService userService,
+                             UserRepository userRepository) {
         this.patientService = patientService;
+        this.userService = userService;
     }
 
     @PostMapping
@@ -36,19 +43,30 @@ public class PatientController {
     }
 
     @GetMapping
-    public ResponseEntity<List<PatientResponse>> getAllPatients() {
-        List<PatientResponse> patients = patientService.getAllPatients();
-        return new ResponseEntity<>(patients, HttpStatus.OK);
+    public ResponseEntity<List<PatientResponse>> getAllPatients(@RequestParam String username) {
+        try{
+            User user = userService.fetchUserByUsername(username);
+
+            if(userService.validatePrivileges(user, "editor")){
+                List<PatientResponse> patients = patientService.getAllPatients();
+                return new ResponseEntity<>(patients, HttpStatus.OK);
+            } else {
+                throw new AccessDeniedException("You do not have permission to access patients");
+            }
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+        } catch (AccessDeniedException e) {
+            return new ResponseEntity<>(null, HttpStatus.FORBIDDEN);
+        }
     }
 
     @DeleteMapping("/{patientId}")
-    public ResponseEntity<Void> deletePatient(@PathVariable Long patientId, @RequestParam Long userId) {
+    public ResponseEntity<Void> deletePatient(@PathVariable Long patientId, @RequestParam String username) {
         try {
-            // Assuming user can be fetched based on userId
-            User user = new User();  // Replace with actual user fetch logic
-            user.setId(userId);
 
+            User user = userService.fetchUserByUsername(username);
             patientService.deletePatient(patientId, user);
+
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
