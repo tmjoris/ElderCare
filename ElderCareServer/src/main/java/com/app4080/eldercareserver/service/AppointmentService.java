@@ -15,7 +15,6 @@ import java.util.List;
 @Transactional
 public class AppointmentService {
 
-
     private final AppointmentRepository appointmentRepository;
     private final PatientService patientService;
 
@@ -26,100 +25,95 @@ public class AppointmentService {
         this.patientService = patientService;
     }
 
-    public boolean checkDocExists(User doctor) throws IllegalArgumentException{
-        if (!doctor.getRole().equals("doctor")){
-            throw new IllegalArgumentException("Invalid doctor");
-        } else {
-            return true;
+    private void validateDoctor(User doctor) {
+        if (!"doctor".equals(doctor.getRole())) {
+            throw new IllegalArgumentException("User is not a doctor");
         }
     }
 
-    public boolean checkPatientExists(Patient patient) throws IllegalArgumentException{
-        if(!patientService.checkExists(patient)){
-            throw new IllegalArgumentException("Invalid patient");
-        } else {
-            return true;
+    private void validatePatient(Patient patient) {
+        if (!patientService.checkExists(patient)) {
+            throw new IllegalArgumentException("Patient does not exist");
         }
     }
 
     @Transactional
-    public Appointment createAppointment(User doctor, Patient patient, LocalDateTime date) throws IllegalArgumentException{
-        if (!checkDocExists(doctor) || !checkPatientExists(patient)){
-            throw new IllegalArgumentException("Invalid Parameters");
+    public Appointment createAppointment(User doctor, Patient patient, LocalDateTime date) {
+        validateDoctor(doctor);
+        validatePatient(patient);
+
+        if (date.isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Appointment date cannot be in the past");
         }
 
-        if (date.isBefore(LocalDateTime.now())){
-            throw new IllegalArgumentException("Invalid date");
-        }
+        Appointment appointment = new Appointment();
+        appointment.setDoctor(doctor);
+        appointment.setPatient(patient);
+        appointment.setAppointmentDate(date);
+        appointment.setStatus("active");
+        appointment.setCreatedAt(LocalDateTime.now());
 
-        Appointment app = new Appointment();
-        app.setAppointmentDate(date);
-        app.setDoctor(doctor);
-        app.setPatient(patient);
-        app.setStatus("active");
-        app.setCreatedAt(LocalDateTime.now());
-
-        return appointmentRepository.save(app);
+        return appointmentRepository.save(appointment);
     }
+
     @Transactional
-    public void deleteAppointment(Appointment app) throws IllegalArgumentException{
-        if (appointmentRepository.existsById(app.getId())){
-            appointmentRepository.deleteById(app.getId());
-        } else {
-            throw new IllegalArgumentException("Invalid Appointment");
+    public void deleteAppointment(Long appointmentId) {
+        if (!appointmentRepository.existsById(appointmentId)) {
+            throw new IllegalArgumentException("Appointment not found");
         }
+        appointmentRepository.deleteById(appointmentId);
     }
 
     @Transactional(readOnly = true)
-    public List<Appointment> getAppointmentByDoc(User doctor){
-        if (!checkDocExists(doctor)){
-            throw new IllegalArgumentException("Invalid doctor");
-        }
-
+    public List<Appointment> getAppointmentsByDoctor(User doctor) {
+        validateDoctor(doctor);
         return appointmentRepository.findByDoctorId(doctor.getId());
     }
 
     @Transactional(readOnly = true)
-    public List<Appointment> getAppointmentByPatient(Patient patient){
-        if (!checkPatientExists(patient)){
-            throw new IllegalArgumentException("Invalid Patient");
-        }
-
+    public List<Appointment> getAppointmentsByPatient(Patient patient) {
+        validatePatient(patient);
         return appointmentRepository.findByPatientId(patient.getId());
     }
 
     @Transactional(readOnly = true)
-    public List<Appointment> getAppointmentByLocation(String location){
+    public List<Appointment> getAppointmentsByLocation(String location) {
         return appointmentRepository.findByLocation(location);
     }
 
     @Transactional(readOnly = true)
-    public List<Appointment> getAppointmentByStatus(String status){
+    public List<Appointment> getAppointmentsByStatus(String status) {
         return appointmentRepository.findByStatus(status);
     }
 
     @Transactional(readOnly = true)
-    public List<Appointment> getAppointmentByPatientAndStatus(Patient patient, String status){
+    public List<Appointment> getAppointmentsByPatientAndStatus(Patient patient, String status) {
+        validatePatient(patient);
         return appointmentRepository.findByPatientIdAndStatus(patient.getId(), status);
     }
 
     @Transactional(readOnly = true)
-    public List<Appointment> getAppointmentByDoctorAndStatus(User doctor, String status){
+    public List<Appointment> getAppointmentsByDoctorAndStatus(User doctor, String status) {
+        validateDoctor(doctor);
         return appointmentRepository.findByDoctorIdAndStatus(doctor.getId(), status);
     }
 
     @Transactional(readOnly = true)
-    public List<Appointment> getAppointmentByPatientAndDoctor(Patient patient, User doctor){
+    public List<Appointment> getAppointmentsByPatientAndDoctor(Patient patient, User doctor) {
+        validatePatient(patient);
+        validateDoctor(doctor);
         return appointmentRepository.findByPatientIdAndDoctorId(patient.getId(), doctor.getId());
     }
 
     @Transactional(readOnly = true)
-    public List<Appointment> getAppointmentByLocationAndDoctor(String location, User doctor){
+    public List<Appointment> getAppointmentsByLocationAndDoctor(String location, User doctor) {
+        validateDoctor(doctor);
         return appointmentRepository.findByLocationAndDoctorId(location, doctor.getId());
     }
 
     @Transactional(readOnly = true)
-    public List<Appointment> getAppointmentByDateRange(LocalDateTime start, LocalDateTime end){
+    public List<Appointment> getAppointmentsByDateRange(LocalDateTime start, LocalDateTime end) {
         return appointmentRepository.findByAppointmentDateBetween(start, end);
     }
 }
+
