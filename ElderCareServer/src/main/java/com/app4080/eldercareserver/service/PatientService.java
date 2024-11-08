@@ -134,6 +134,11 @@ public class PatientService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
+    public Patient findPatientById(Long patientId) {
+        return patientRepository.getReferenceById(patientId);
+    }
+
     boolean checkExists(Patient patient) {
         return !patientRepository.findByFirstNameAndLastName(patient.getFirstName(), patient.getLastName()).isEmpty();
     }
