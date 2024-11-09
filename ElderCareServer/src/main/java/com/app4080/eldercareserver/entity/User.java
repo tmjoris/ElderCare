@@ -30,9 +30,11 @@ public class User {
     @Column(name = "phone_number", length = 20)
     private String phoneNumber;
 
+    // doctor, nurse, or patient
     @Column(name = "role", nullable = false, length = 50)
     private String role;
 
+    // overseer, admin, supervisor, editor, viewer
     @Column(name = "privileges", nullable = false)
     private String privileges;
 
