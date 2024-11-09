@@ -30,15 +30,16 @@ public class PatientController {
     }
 
     @PostMapping
-    public ResponseEntity<PatientResponse> createPatient(@RequestBody PatientRequest requestDto, @RequestParam String username) {
+    public ResponseEntity<PatientResponse> createPatient(
+            @RequestBody PatientRequest requestDto, @RequestParam String username) {
         try {
             userService.validatePrivileges(username, "editor");
             PatientResponse responseDto = patientService.createPatient(requestDto);
-            return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
+            return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
         } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+            return ResponseEntity.badRequest().build();
         } catch (AccessDeniedException e) {
-            return new ResponseEntity<>(null, HttpStatus.FORBIDDEN);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
     }
 
@@ -47,11 +48,11 @@ public class PatientController {
         try {
             userService.validatePrivileges(username, "editor");
             List<PatientResponse> patients = patientService.getAllPatients();
-            return new ResponseEntity<>(patients, HttpStatus.OK);
+            return ResponseEntity.ok(patients);
         } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+            return ResponseEntity.badRequest().build();
         } catch (AccessDeniedException e) {
-            return new ResponseEntity<>(null, HttpStatus.FORBIDDEN);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
     }
 
@@ -63,11 +64,11 @@ public class PatientController {
             userService.validatePrivileges(username, "supervisor");
             patientService.deletePatient(patientId, user);
 
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            return ResponseEntity.noContent().build();
         } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         } catch (AccessDeniedException e) {
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
     }
 
@@ -76,9 +77,9 @@ public class PatientController {
         try{
             userService.validatePrivileges(username, "supervisor");
             List<PatientSummary> patients = patientService.findPatientByLastName(lastName);
-            return new ResponseEntity<>(patients, HttpStatus.OK);
+            return ResponseEntity.ok(patients);
         } catch (AccessDeniedException e) {
-            return new ResponseEntity<>(null, HttpStatus.FORBIDDEN);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
     }
 
@@ -88,9 +89,9 @@ public class PatientController {
         try{
             userService.validatePrivileges(username, "supervisor");
             List<PatientSearch> patients = patientService.keywordSearch(keyword);
-            return new ResponseEntity<>(patients, HttpStatus.OK);
+            return ResponseEntity.ok(patients);
         } catch (AccessDeniedException e) {
-            return new ResponseEntity<>(null, HttpStatus.FORBIDDEN);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
     }
 
@@ -102,9 +103,9 @@ public class PatientController {
         try{
             userService.validatePrivileges(username, "supervisor");
             List<PatientSearch> patients = patientService.findPatientsByAgeRange(minAge, maxAge);
-            return new ResponseEntity<>(patients, HttpStatus.OK);
+            return ResponseEntity.ok(patients);
         } catch (AccessDeniedException e) {
-            return new ResponseEntity<>(null, HttpStatus.FORBIDDEN);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
     }
 }

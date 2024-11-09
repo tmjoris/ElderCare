@@ -122,5 +122,3 @@ public class AppointmentController {
         return ResponseEntity.ok(appointments);
     }
 }
-
-
