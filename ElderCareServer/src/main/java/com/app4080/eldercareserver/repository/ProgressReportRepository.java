@@ -15,10 +15,10 @@ public interface ProgressReportRepository extends JpaRepository<ProgressReport, 
     // Find reports by date range
     List<ProgressReport> findByDateBetween(LocalDateTime startDate, LocalDateTime endDate);
 
-//    // Find latest report for each patient
-//    @Query("SELECT pr FROM ProgressReport pr WHERE pr.date = " +
-//            "(SELECT MAX(pr2.date) FROM ProgressReport pr2 WHERE pr2.patientId = pr.patientId)")
-//    List<ProgressReport> findLatestReportsForAllPatients();
+    // Find latest report for each patient
+    @Query("SELECT pr FROM ProgressReport pr WHERE pr.date = " +
+            "(SELECT MAX(pr2.date) FROM ProgressReport pr2 WHERE pr2.patient.id = pr.patient.id)")
+    List<ProgressReport> findLatestReportsForAllPatients();
 
     // Search reports by content
     @Query("SELECT pr FROM ProgressReport pr WHERE " +
