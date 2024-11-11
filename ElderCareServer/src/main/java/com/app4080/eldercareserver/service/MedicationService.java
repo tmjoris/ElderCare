@@ -2,13 +2,18 @@ package com.app4080.eldercareserver.service;
 
 import com.app4080.eldercareserver.entity.MedicalRecord;
 import com.app4080.eldercareserver.entity.Medication;
+import com.app4080.eldercareserver.repository.MedicalRecordRepository;
 import com.app4080.eldercareserver.repository.MedicationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.app4080.eldercareserver.dto.medication.*;
+
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -16,53 +21,114 @@ public class MedicationService {
 
     private final MedicationRepository medicationRepository;
     private final MedicalRecordService medicalRecordService;
+    private final MedicalRecordRepository recordRepository;
 
     @Autowired
     public MedicationService(MedicationRepository medicationRepository,
-                             MedicalRecordService medicalRecordService) {
+                             MedicalRecordService medicalRecordService,
+                             MedicalRecordRepository recordRepository) {
         this.medicationRepository = medicationRepository;
         this.medicalRecordService = medicalRecordService;
+        this.recordRepository = recordRepository;
     }
 
-    @Transactional
-    public Medication addMedication(Medication medication) {
-        return medicationRepository.save(medication);
+    // Converts a Medication entity to MedicationResponse DTO
+    private MedicationResponse convertToResponse(Medication medication) {
+        MedicationResponse response = new MedicationResponse();
+        response.setId(medication.getId());
+        response.setMedicationName(medication.getMedicationName());
+        response.setDosage(medication.getDosage());
+        response.setFrequency(medication.getFrequency());
+        response.setStartDate(medication.getStartDate());
+        response.setEndDate(medication.getEndDate());
+        response.setMedicalRecordId(medication.getMedicalRecord().getId());
+        response.setCreatedAt(medication.getCreatedAt());
+        return response;
     }
 
+    // Converts a MedicationRequest DTO to a Medication entity
+    private Medication convertToEntity(MedicationRequest request) {
+        Medication medication = new Medication();
+        medication.setMedicationName(request.getMedicationName());
+        medication.setDosage(request.getDosage());
+        medication.setFrequency(request.getFrequency());
+        medication.setStartDate(request.getStartDate());
+        medication.setEndDate(request.getEndDate());
+
+        Optional<MedicalRecord> medicalRecord = recordRepository.findById(request.getMedicalRecordId());
+
+        if (medicalRecord.isPresent()) {
+            MedicalRecord mr = medicalRecord.get();
+            medication.setMedicalRecord(mr);
+        } else {throw new IllegalArgumentException("Medical record not found");}
+
+        return medication;
+    }
+
+    // Adds a new medication and returns a MedicationResponse DTO
+    public MedicationResponse addMedication(MedicationRequest medicationRequest) {
+        Medication medication = convertToEntity(medicationRequest);
+        Medication savedMedication = medicationRepository.save(medication);
+        return convertToResponse(savedMedication);
+    }
+
+    // Retrieves all medications and returns them as a list of MedicationResponse DTOs
     @Transactional(readOnly = true)
-    public List<Medication> getAllMedications() {
-        return medicationRepository.findAll();
+    public List<MedicationResponse> getAllMedications() {
+        Collectors Collectors = null;
+        return medicationRepository.findAll()
+                .stream()
+                .map(this::convertToResponse)
+                .collect(java.util.stream.Collectors.toList());
     }
 
+    // Retrieves medications for a
+    // specific medical record and returns them as MedicationResponse DTOs
     @Transactional(readOnly = true)
-    public List<Medication> getMedicalRecord(MedicalRecord mr) throws IllegalArgumentException{
-        if(!medicalRecordService.checkExists(mr)){
+    public List<MedicationResponse> getMedicationsByMedicalRecord(MedicalRecord medicalRecord) throws IllegalArgumentException {
+        if (!medicalRecordService.checkExists(medicalRecord)) {
             throw new IllegalArgumentException("Medical record does not exist");
         }
-        return medicationRepository.findByMedicalRecord(mr);
+        return medicationRepository.findByMedicalRecord(medicalRecord)
+                .stream()
+                .map(this::convertToResponse)
+                .collect(Collectors.toList());
     }
 
-    @Transactional
-    public void deleteMedication(Medication medication) throws IllegalArgumentException{
-        if(medicationRepository.existsById(medication.getId())){
-            medicationRepository.deleteById(medication.getId());
+    // Deletes a medication
+    public void deleteMedication(Long medicationId) throws IllegalArgumentException {
+        if (medicationRepository.existsById(medicationId)) {
+            medicationRepository.deleteById(medicationId);
         } else {
-            throw new IllegalArgumentException("Medical record does not exist");
+            throw new IllegalArgumentException("Medication does not exist");
         }
     }
 
+    // Retrieves active medications and returns them as MedicationResponse DTOs
     @Transactional(readOnly = true)
-    public List<Medication> findAllActiveMedications() {
-        return medicationRepository.findActiveMedications();
+    public List<MedicationResponse> findAllActiveMedications() {
+        return medicationRepository.findActiveMedications()
+                .stream()
+                .map(this::convertToResponse)
+                .collect(Collectors.toList());
     }
 
+    // Finds medications by name pattern and returns them as MedicationResponse DTOs
     @Transactional(readOnly = true)
-    public List<Medication> findByName(String name) {
-        return medicationRepository.findByMedicationNameContainingIgnoreCase(name);
+    public List<MedicationResponse> findByName(String name) {
+        return medicationRepository.findByMedicationNameContainingIgnoreCase(name)
+                .stream()
+                .map(this::convertToResponse)
+                .collect(Collectors.toList());
     }
 
+    // Finds medications expiring soon and returns them as MedicationResponse DTOs
     @Transactional(readOnly = true)
-    public List<Medication> findMedicationsExpiringSoon(){
-        return medicationRepository.findMedicationsExpiringSoon(LocalDateTime.now());
+    public List<MedicationResponse> findMedicationsExpiringSoon() {
+        return medicationRepository.findMedicationsExpiringSoon(LocalDateTime.now())
+                .stream()
+                .map(this::convertToResponse)
+                .collect(Collectors.toList());
     }
 }
+
