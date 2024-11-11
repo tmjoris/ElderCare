@@ -86,9 +86,11 @@ public class MedicationService {
     // specific medical record and returns them as MedicationResponse DTOs
     @Transactional(readOnly = true)
     public List<MedicationResponse> getMedicationsByMedicalRecord(MedicalRecord medicalRecord) throws IllegalArgumentException {
+
         if (!medicalRecordService.checkExists(medicalRecord)) {
             throw new IllegalArgumentException("Medical record does not exist");
         }
+
         return medicationRepository.findByMedicalRecord(medicalRecord)
                 .stream()
                 .map(this::convertToResponse)
