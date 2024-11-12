@@ -5,6 +5,7 @@ import com.app4080.eldercareserver.dto.medicalrecord.MedicalRecordResponse;
 import com.app4080.eldercareserver.dto.medicalrecord.MedicalRecordSearchCriteria;
 import com.app4080.eldercareserver.service.MedicalRecordService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -68,7 +69,8 @@ public class MedicalRecordController {
     // Get medical records by date range
     @GetMapping("/date-range")
     public ResponseEntity<List<MedicalRecordResponse>> getMedicalRecordsByDateRange(
-            @RequestParam LocalDateTime startDate, @RequestParam LocalDateTime endDate) {
+            @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+            @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
         List<MedicalRecordResponse> records = medicalRecordService.getMedicalRecordsByDateRange(startDate, endDate);
         return ResponseEntity.ok(records);
     }
