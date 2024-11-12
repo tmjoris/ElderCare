@@ -1,7 +1,6 @@
 package com.app4080.eldercareserver.entity;
 
 import jakarta.persistence.*;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
