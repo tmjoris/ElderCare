@@ -1,17 +1,18 @@
 package com.app4080.eldercareserver.service;
 
-import com.app4080.eldercareserver.entity.Patient;
 import com.app4080.eldercareserver.entity.ProgressReport;
-import com.app4080.eldercareserver.entity.User;
 import com.app4080.eldercareserver.repository.PatientRepository;
 import com.app4080.eldercareserver.repository.ProgressReportRepository;
 import com.app4080.eldercareserver.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.app4080.eldercareserver.dto.progressreport.ProgressReportRequest;
+import com.app4080.eldercareserver.dto.progressreport.ProgressReportResponse;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -30,46 +31,86 @@ public class ProgressReportService {
         this.userRepository = userRepository;
     }
 
-    @Transactional
-    public ProgressReport createProgressReport(ProgressReport progressReport) {
-        return progressReportRepository.save(progressReport);
+    public ProgressReportResponse createProgressReport(ProgressReportRequest request) {
+        ProgressReport progressReport = fromRequest(request);
+        progressReport.setCreatedAt(LocalDateTime.now());
+        ProgressReport savedReport = progressReportRepository.save(progressReport);
+        return toResponse(savedReport);
     }
 
-    @Transactional
-    public void deleteProgressReport(ProgressReport progressReport) {
-        progressReportRepository.delete(progressReport);
-    }
-
-    @Transactional(readOnly = true)
-    public List<ProgressReport> getAllProgressReports() {
-        return progressReportRepository.findAll();
+    public void deleteProgressReport(Long reportId) {
+        progressReportRepository.deleteById(reportId);
     }
 
     @Transactional(readOnly = true)
-    public List<ProgressReport> getPRbyPatient(Patient patient){
-        if(patientRepository.existsById(patient.getId())){
-            return progressReportRepository.findByPatientId(patient.getId());
-        } else {
+    public List<ProgressReportResponse> getAllProgressReports() {
+        return progressReportRepository.findAll()
+                .stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<ProgressReportResponse> getPRbyPatient(Long patientId) {
+        if (!patientRepository.existsById(patientId)) {
             throw new IllegalArgumentException("Patient not found");
         }
+        return progressReportRepository.findByPatientId(patientId)
+                .stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
-    public List<ProgressReport> getPRbyCaregiver(User nurse){
-        if(userRepository.existsById(nurse.getId())){
-            return progressReportRepository.findByCaregiverId(nurse.getId());
-        } else {
-            throw new IllegalArgumentException("Nurse not found");
+    public List<ProgressReportResponse> getPRbyCaregiver(Long caregiverId) {
+        if (!userRepository.existsById(caregiverId)) {
+            throw new IllegalArgumentException("Caregiver not found");
         }
+        return progressReportRepository.findByCaregiverId(caregiverId)
+                .stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
-    public List<ProgressReport> findPRbyRange(LocalDateTime start, LocalDateTime end){
-        return progressReportRepository.findByDateBetween(start, end);
+    public List<ProgressReportResponse> findPRbyRange(LocalDateTime start, LocalDateTime end) {
+        return progressReportRepository.findByDateBetween(start, end)
+                .stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
-    public List<ProgressReport> keywordSearch(String keyword){
-        return progressReportRepository.searchReports(keyword);
+    public List<ProgressReportResponse> keywordSearch(String keyword) {
+        return progressReportRepository.searchReports(keyword)
+                .stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    // Helper method to convert a ProgressReport entity to a ProgressReportResponse
+    private ProgressReportResponse toResponse(ProgressReport report) {
+        ProgressReportResponse response = new ProgressReportResponse();
+        response.setId(report.getId());
+        response.setPatientId(report.getPatient().getId());
+        response.setCaregiverId(report.getCaregiver().getId());
+        response.setDate(report.getDate());
+        response.setSummary(report.getSummary());
+        response.setRecommendations(report.getRecommendations());
+        response.setCreatedAt(report.getCreatedAt());
+        return response;
+    }
+
+    // Helper method to convert a ProgressReportRequest to a ProgressReport entity
+    private ProgressReport fromRequest(ProgressReportRequest request) {
+        ProgressReport report = new ProgressReport();
+        report.setPatient(patientRepository.findById(request.getPatientId())
+                .orElseThrow(() -> new IllegalArgumentException("Patient not found")));
+        report.setCaregiver(userRepository.findById(request.getCaregiverId())
+                .orElseThrow(() -> new IllegalArgumentException("Caregiver not found")));
+        report.setDate(request.getDate());
+        report.setSummary(request.getSummary());
+        report.setRecommendations(request.getRecommendations());
+        return report;
     }
 }
