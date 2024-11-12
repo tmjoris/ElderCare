@@ -40,8 +40,12 @@ public class UserService {
         }
     }
 
-    private boolean validateRole(User currentUser, List<String> requiredRole){
-        return requiredRole.contains(currentUser.getRole());
+    public void validateRole(String username, List<String> requiredRole) throws AccessDeniedException {
+        User user = fetchUserByUsername(username);
+        if (requiredRole.contains(user.getRole())){return;}
+        else {
+            throw new AccessDeniedException("User lacking Required role");
+        }
     }
 
     private UserResponse convertToResponse(User user) {
