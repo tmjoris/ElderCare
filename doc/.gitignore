@@ -1,2 +1,6 @@
 # word document
 ServerDoc.docx
+
+# local files
+**.docx
+**.tmp
