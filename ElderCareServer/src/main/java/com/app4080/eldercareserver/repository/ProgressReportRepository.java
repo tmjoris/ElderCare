@@ -4,10 +4,12 @@ import com.app4080.eldercareserver.entity.ProgressReport;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Repository
 public interface ProgressReportRepository extends JpaRepository<ProgressReport, Long> {
     List<ProgressReport> findByPatientId(Long patientId);
     List<ProgressReport> findByCaregiverId(Long caregiverId);
