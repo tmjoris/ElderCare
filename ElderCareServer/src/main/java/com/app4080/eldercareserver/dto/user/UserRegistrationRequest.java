@@ -2,6 +2,8 @@ package com.app4080.eldercareserver.dto.user;
 
 public class UserRegistrationRequest {
     private String username;
+    private String firstName;
+    private String secondName;
     private String password;
     private String email;
     private String primaryLocation;
@@ -85,5 +87,21 @@ public class UserRegistrationRequest {
 
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getSecondName() {
+        return secondName;
+    }
+
+    public void setSecondName(String secondName) {
+        this.secondName = secondName;
     }
 }

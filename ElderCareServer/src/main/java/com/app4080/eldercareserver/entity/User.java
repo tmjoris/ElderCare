@@ -14,6 +14,12 @@ public class User {
     @Column(name = "username", nullable = false, length = 100, unique = true)
     private String username;
 
+    @Column(name = "firstName", nullable = false)
+    private String firstName;
+
+    @Column(name = "secondName", nullable = false)
+    private String secondName;
+
     @Column(name = "password", nullable = false)
     private String password;
 
@@ -146,5 +152,21 @@ public class User {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getSecondName() {
+        return secondName;
+    }
+
+    public void setSecondName(String secondName) {
+        this.secondName = secondName;
     }
 }

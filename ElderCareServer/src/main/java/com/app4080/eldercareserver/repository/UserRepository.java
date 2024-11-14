@@ -28,4 +28,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
             "LOWER(u.email) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
             "u.phoneNumber LIKE CONCAT('%', :searchTerm, '%')")
     List<User> searchUsers(@Param("searchTerm") String searchTerm);
+
+    Optional<User> findByFirstNameAndSecondName(String firstName, String secondName);
 }

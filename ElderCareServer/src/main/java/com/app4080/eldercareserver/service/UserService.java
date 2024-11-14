@@ -28,9 +28,8 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public void validatePrivileges(String username, String requiredPrivilege)
-            throws AccessDeniedException {
-
+    // Validate user privileges
+    public void validatePrivileges(String username, String requiredPrivilege) throws AccessDeniedException {
         User user = fetchUserByUsername(username);
         int currentAccess = accessConfig.getTier(user.getPrivileges());
         int requiredAccess = accessConfig.getTier(requiredPrivilege);
@@ -40,18 +39,21 @@ public class UserService {
         }
     }
 
+    // Validate user role
     public void validateRole(String username, List<String> requiredRole) throws AccessDeniedException {
         User user = fetchUserByUsername(username);
-        if (requiredRole.contains(user.getRole())){return;}
-        else {
-            throw new AccessDeniedException("User lacking Required role");
-        }
+        if (requiredRole.contains(user.getRole())) return;
+
+        throw new AccessDeniedException("User lacking required role");
     }
 
+    // Convert User entity to UserResponse DTO
     private UserResponse convertToResponse(User user) {
         UserResponse response = new UserResponse();
         response.setId(user.getId());
         response.setUsername(user.getUsername());
+        response.setFirstName(user.getFirstName());
+        response.setSecondName(user.getSecondName());
         response.setEmail(user.getEmail());
         response.setPrimaryLocation(user.getPrimaryLocation());
         response.setSecondaryLocation(user.getSecondaryLocation());
@@ -62,9 +64,9 @@ public class UserService {
         return response;
     }
 
+    // Register a new user
     @Transactional
     public UserResponse registerUser(UserRegistrationRequest registrationRequest) throws IllegalArgumentException {
-        // Validate unique constraints
         if (userRepository.existsByUsername(registrationRequest.getUsername())) {
             throw new IllegalArgumentException("Username already exists");
         }
@@ -74,6 +76,8 @@ public class UserService {
 
         User user = new User();
         user.setUsername(registrationRequest.getUsername());
+        user.setFirstName(registrationRequest.getFirstName());
+        user.setSecondName(registrationRequest.getSecondName());
         user.setPassword(registrationRequest.getPassword()); // Remember to hash the password!
         user.setEmail(registrationRequest.getEmail());
         user.setPrimaryLocation(registrationRequest.getPrimaryLocation());
@@ -84,14 +88,15 @@ public class UserService {
         user.setCreatedAt(LocalDateTime.now());
 
         user = userRepository.save(user);
-
         return convertToResponse(user);
     }
 
+    // Update an existing user
     @Transactional
     public UserResponse updateUser(Long id, UserUpdateRequest updateRequest) {
-        User user = userRepository.findById(id).orElseThrow(()
-                -> new IllegalArgumentException("User not found"));
+        User user = userRepository.findById(id).orElseThrow(() ->
+                new IllegalArgumentException("User not found"));
+
         user.setEmail(updateRequest.getEmail());
         user.setPrimaryLocation(updateRequest.getPrimaryLocation());
         user.setSecondaryLocation(updateRequest.getSecondaryLocation());
@@ -103,15 +108,19 @@ public class UserService {
         return convertToResponse(user);
     }
 
+    // Delete a user based on login request
     @Transactional
     public void deleteUser(LoginRequest lr) throws IllegalArgumentException {
         Optional<User> user = userRepository.findByUsername(lr.getUsername());
 
-        if (user.isEmpty()) {throw new IllegalArgumentException("User not found");}
+        if (user.isEmpty()) {
+            throw new IllegalArgumentException("User not found");
+        }
 
         userRepository.delete(user.get());
     }
 
+    // Login validation
     public void login(LoginRequest loginRequest) throws AccessDeniedException, IllegalArgumentException {
         Optional<User> existing = userRepository.findByUsername(loginRequest.getUsername());
 
@@ -119,20 +128,25 @@ public class UserService {
             throw new IllegalArgumentException("Username not found");
         }
 
-        if (loginRequest.getPassword().equals(existing.get().getPassword())) {return;}
-
-        else {throw new AccessDeniedException("Invalid password");}
+        if (!loginRequest.getPassword().equals(existing.get().getPassword())) {
+            throw new AccessDeniedException("Invalid password");
+        }
     }
 
+    // Fetch user by username
     public User fetchUserByUsername(String username) {
-        Optional<User> user = userRepository.findByUsername(username);
-
-        if (user.isEmpty()) {throw new IllegalArgumentException("User not found");}
-
-        return user.get();
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
     }
 
-    // Find a user by username
+    // Find user by first and second names
+    @Transactional(readOnly = true)
+    public Optional<UserResponse> findUserByFirstNameAndSecondName(String firstName, String secondName) {
+        return userRepository.findByFirstNameAndSecondName(firstName, secondName)
+                .map(this::convertToResponse);
+    }
+
+    // Find user by username
     @Transactional(readOnly = true)
     public Optional<UserResponse> findUserByUsername(String username) {
         return userRepository.findByUsername(username).map(this::convertToResponse);
@@ -194,3 +208,4 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 }
+

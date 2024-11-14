@@ -6,6 +6,8 @@ public class UserResponse {
 
     private Long id;
     private String username;
+    private String firstName;
+    private String secondName;
     private String email;
     private String primaryLocation;
     private String secondaryLocation;
@@ -13,18 +15,6 @@ public class UserResponse {
     private String role;
     private String privileges;
     private LocalDateTime createdAt;
-
-    public UserResponse(Long id, String username, String email, String primaryLocation, String secondaryLocation, String phoneNumber, String role, String privileges, LocalDateTime createdAt) {
-        this.id = id;
-        this.username = username;
-        this.email = email;
-        this.primaryLocation = primaryLocation;
-        this.secondaryLocation = secondaryLocation;
-        this.phoneNumber = phoneNumber;
-        this.role = role;
-        this.privileges = privileges;
-        this.createdAt = createdAt;
-    }
 
     public UserResponse() {
 
@@ -100,5 +90,21 @@ public class UserResponse {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getSecondName() {
+        return secondName;
+    }
+
+    public void setSecondName(String secondName) {
+        this.secondName = secondName;
     }
 }
