@@ -7,12 +7,13 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface PatientRepository extends JpaRepository<Patient, Long> {
     List<Patient> findByLastName(String lastName);
 
-    List<Patient> findByFirstNameAndLastName(String firstName, String lastName);
+    Optional<Patient> findByFirstNameAndLastName(String firstName, String lastName);
 
     // Search patients by various fields
     @Query("SELECT p FROM Patient p WHERE " +

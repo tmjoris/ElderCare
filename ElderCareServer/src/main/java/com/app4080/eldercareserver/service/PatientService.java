@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -137,6 +138,15 @@ public class PatientService {
     @Transactional(readOnly = true)
     public Patient findPatientById(Long patientId) {
         return patientRepository.getReferenceById(patientId);
+    }
+
+    @Transactional(readOnly = true)
+    public Patient fetchPatientByNames(String firstName, String lastName){
+        Optional<Patient> pt = patientRepository.findByFirstNameAndLastName(firstName, lastName);
+        if (pt.isPresent()) {
+            return pt.get();
+        }
+        else {throw new IllegalArgumentException("Patient does not exist");}
     }
 
     boolean checkExists(Patient patient) {
