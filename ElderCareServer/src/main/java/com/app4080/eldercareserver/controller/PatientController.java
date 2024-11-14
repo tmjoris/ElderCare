@@ -5,7 +5,6 @@ import com.app4080.eldercareserver.dto.patient.PatientResponse;
 import com.app4080.eldercareserver.dto.patient.PatientSearch;
 import com.app4080.eldercareserver.dto.patient.PatientSummary;
 import com.app4080.eldercareserver.dto.user.LoginRequest;
-import com.app4080.eldercareserver.entity.Patient;
 import com.app4080.eldercareserver.entity.User;
 import com.app4080.eldercareserver.service.PatientService;
 import com.app4080.eldercareserver.service.UserService;
