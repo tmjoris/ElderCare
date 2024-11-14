@@ -2,6 +2,7 @@ package com.app4080.eldercareserver.service;
 
 import com.app4080.eldercareserver.config.accessConfig;
 import com.app4080.eldercareserver.dto.patient.*;
+import com.app4080.eldercareserver.dto.user.LoginRequest;
 import com.app4080.eldercareserver.entity.Patient;
 import com.app4080.eldercareserver.entity.User;
 import com.app4080.eldercareserver.repository.PatientRepository;
@@ -20,10 +21,12 @@ import java.util.stream.Collectors;
 public class PatientService {
 
     private final PatientRepository patientRepository;
+    private final UserService userService;
 
     @Autowired
-    public PatientService(PatientRepository patientRepository) {
+    public PatientService(PatientRepository patientRepository, UserService userService) {
         this.patientRepository = patientRepository;
+        this.userService = userService;
     }
 
     // Conversion Methods
@@ -147,6 +150,18 @@ public class PatientService {
             return pt.get();
         }
         else {throw new IllegalArgumentException("Patient does not exist");}
+    }
+
+    public PatientResponse matchUserandPatientLoginthenFetchPatient(LoginRequest loginRequest) throws AccessDeniedException {
+        User user = userService.fetchUserByUsername(loginRequest.getUsername());
+        userService.login(loginRequest);
+        Optional<Patient> pt = patientRepository.findByFirstNameAndLastName(user.getFirstName(), user.getSecondName());
+        if (pt.isPresent()) {
+            Patient patient = pt.get();
+            return convertToResponseDto(patient);
+        } else {
+            throw new IllegalArgumentException("Patient does not exist");
+        }
     }
 
     boolean checkExists(Patient patient) {

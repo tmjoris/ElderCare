@@ -4,6 +4,8 @@ import com.app4080.eldercareserver.dto.patient.PatientRequest;
 import com.app4080.eldercareserver.dto.patient.PatientResponse;
 import com.app4080.eldercareserver.dto.patient.PatientSearch;
 import com.app4080.eldercareserver.dto.patient.PatientSummary;
+import com.app4080.eldercareserver.dto.user.LoginRequest;
+import com.app4080.eldercareserver.entity.Patient;
 import com.app4080.eldercareserver.entity.User;
 import com.app4080.eldercareserver.service.PatientService;
 import com.app4080.eldercareserver.service.UserService;
@@ -53,6 +55,18 @@ public class PatientController {
             return ResponseEntity.badRequest().build();
         } catch (AccessDeniedException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+    }
+
+    @GetMapping
+    public ResponseEntity<PatientResponse> getPatient(LoginRequest lr) {
+        try{
+            PatientResponse pr = patientService.matchUserandPatientLoginthenFetchPatient(lr);
+            return ResponseEntity.ok(pr);
+        } catch (AccessDeniedException e){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
         }
     }
 
