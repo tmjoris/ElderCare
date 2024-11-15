@@ -152,16 +152,23 @@ public class PatientService {
         else {throw new IllegalArgumentException("Patient does not exist");}
     }
 
-    public PatientResponse matchUserandPatientLoginthenFetchPatient(LoginRequest loginRequest) throws AccessDeniedException {
+    public PatientResponse getPatientRecord(LoginRequest loginRequest) throws AccessDeniedException {
+        // Authenticate user and retrieve user details
+        userService.login(loginRequest); // This performs login, assuming it throws an exception if failed
+
         User user = userService.fetchUserByUsername(loginRequest.getUsername());
-        userService.login(loginRequest);
-        Optional<Patient> pt = patientRepository.findByFirstNameAndLastName(user.getFirstName(), user.getSecondName());
-        if (pt.isPresent()) {
-            Patient patient = pt.get();
-            return convertToResponseDto(patient);
-        } else {
-            throw new IllegalArgumentException("Patient does not exist");
+
+        // Check if the user has the role "patient"
+        if (!user.getRole().equalsIgnoreCase("patient")) {
+            throw new AccessDeniedException("Access denied: User is not a patient");
         }
+
+        // Retrieve the patient record that matches the user's first and last name
+        Patient patient = patientRepository.findByFirstNameAndLastName(user.getFirstName(), user.getSecondName())
+                .orElseThrow(() -> new IllegalArgumentException("Patient record not found"));
+
+        // Convert and return the patient information as a PatientResponse DTO
+        return convertToResponseDto(patient);
     }
 
     boolean checkExists(Patient patient) {
