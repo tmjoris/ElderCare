@@ -3,9 +3,9 @@
 **.tmp
 
 HELP.md
-.gradle
-build/
-!gradle/wrapper/gradle-wrapper.jar
+ElderCareServer/.gradle
+ElderCareServer/build
+ElderCareServer/gradle
 !**/src/main/**/build/
 !**/src/test/**/build/
 
