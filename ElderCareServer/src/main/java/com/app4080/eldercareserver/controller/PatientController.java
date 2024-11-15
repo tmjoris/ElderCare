@@ -57,15 +57,15 @@ public class PatientController {
         }
     }
 
-    @GetMapping
-    public ResponseEntity<PatientResponse> getPatient(LoginRequest lr) {
-        try{
-            PatientResponse pr = patientService.matchUserandPatientLoginthenFetchPatient(lr);
-            return ResponseEntity.ok(pr);
-        } catch (AccessDeniedException e){
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    @GetMapping("/login")
+    public ResponseEntity<PatientResponse> getPatientRecord(@RequestBody LoginRequest loginRequest) {
+        try {
+            PatientResponse patientResponse = patientService.getPatientRecord(loginRequest);
+            return ResponseEntity.ok(patientResponse);
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        } catch (AccessDeniedException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
         }
     }
 
