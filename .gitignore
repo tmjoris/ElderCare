@@ -3,11 +3,11 @@
 **.tmp
 
 HELP.md
-ElderCareServer/.gradle/*
-ElderCareServer/build/*
-ElderCareServer/gradle/*
+ElderCareServer/.gradle/
+ElderCareServer/build/
+ElderCareServer/gradle/
 gradlew.bat
-
+gradlew
 
 !**/src/main/**/build/
 !**/src/test/**/build/
