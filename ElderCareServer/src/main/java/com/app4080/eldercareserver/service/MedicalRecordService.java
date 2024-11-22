@@ -7,6 +7,8 @@ import com.app4080.eldercareserver.entity.MedicalRecord;
 import com.app4080.eldercareserver.entity.Patient;
 import com.app4080.eldercareserver.entity.User;
 import com.app4080.eldercareserver.repository.MedicalRecordRepository;
+import com.app4080.eldercareserver.repository.PatientRepository;
+import com.app4080.eldercareserver.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,10 +22,16 @@ import java.util.stream.Collectors;
 public class MedicalRecordService {
 
     private final MedicalRecordRepository medicalRecordRepository;
+    private final PatientRepository patientRepository;
+    private final UserRepository userRepository;
 
     @Autowired
-    public MedicalRecordService(MedicalRecordRepository medicalRecordRepository) {
+    public MedicalRecordService(MedicalRecordRepository medicalRecordRepository,
+                                PatientRepository patientRepository,
+                                UserRepository userRepository) {
         this.medicalRecordRepository = medicalRecordRepository;
+        this.patientRepository = patientRepository;
+        this.userRepository = userRepository;
     }
 
     private MedicalRecordResponse toResponse(MedicalRecord medicalRecord) {
@@ -43,8 +51,12 @@ public class MedicalRecordService {
     @Transactional
     public MedicalRecordResponse addMedicalRecord(MedicalRecordRequest request) {
         MedicalRecord medicalRecord = new MedicalRecord();
-        medicalRecord.setPatient(new Patient(request.getPatientId()));
-        medicalRecord.setDoctor(new User(request.getDoctorId()));
+        Patient patient = patientRepository.findById(request.getPatientId())
+                .orElseThrow(() -> new IllegalArgumentException("Patient not found"));
+        User doctor = userRepository.findById(request.getDoctorId())
+                .orElseThrow(() -> new IllegalArgumentException("Doctor not found"));
+        medicalRecord.setPatient(patient);
+        medicalRecord.setDoctor(doctor);
         medicalRecord.setDateOfVisit(request.getDateOfVisit());
         medicalRecord.setLocation(request.getLocation());
         medicalRecord.setDiagnosis(request.getDiagnosis());
