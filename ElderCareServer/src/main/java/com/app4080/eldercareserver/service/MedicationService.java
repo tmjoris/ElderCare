@@ -48,6 +48,10 @@ public class MedicationService {
 
     // Converts a MedicationRequest DTO to a Medication entity
     private Medication convertToEntity(MedicationRequest request) {
+        if (request == null) {
+            throw new IllegalArgumentException("MedicationRequest cannot be null");
+        }
+
         Medication medication = new Medication();
         medication.setMedicationName(request.getMedicationName());
         medication.setDosage(request.getDosage());
@@ -55,22 +59,20 @@ public class MedicationService {
         medication.setStartDate(request.getStartDate());
         medication.setEndDate(request.getEndDate());
 
-        Optional<MedicalRecord> medicalRecord = recordRepository.findById(request.getMedicalRecordId());
-
-        if (medicalRecord.isPresent()) {
-            MedicalRecord mr = medicalRecord.get();
-            medication.setMedicalRecord(mr);
-        } else {throw new IllegalArgumentException("Medical record not found");}
+        MedicalRecord medicalRecord = recordRepository.findById(request.getMedicalRecordId())
+                .orElseThrow(() -> new IllegalArgumentException("Medical record not found"));
+        medication.setMedicalRecord(medicalRecord);
 
         return medication;
     }
 
-    // Adds a new medication and returns a MedicationResponse DTO
     public MedicationResponse addMedication(MedicationRequest medicationRequest) {
         Medication medication = convertToEntity(medicationRequest);
+        medication.setCreatedAt(LocalDateTime.now());
         Medication savedMedication = medicationRepository.save(medication);
         return convertToResponse(savedMedication);
     }
+
 
     // Retrieves all medications and returns them as a list of MedicationResponse DTOs
     @Transactional(readOnly = true)

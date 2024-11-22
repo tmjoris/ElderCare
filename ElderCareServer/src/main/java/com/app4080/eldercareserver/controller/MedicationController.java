@@ -1,5 +1,6 @@
 package com.app4080.eldercareserver.controller;
 
+import ch.qos.logback.classic.Logger;
 import com.app4080.eldercareserver.dto.medication.MedicationRequest;
 import com.app4080.eldercareserver.dto.medication.MedicationResponse;
 import com.app4080.eldercareserver.entity.MedicalRecord;
@@ -7,6 +8,7 @@ import com.app4080.eldercareserver.repository.MedicalRecordRepository;
 import com.app4080.eldercareserver.service.MedicationService;
 import com.app4080.eldercareserver.service.UserService;
 import com.app4080.eldercareserver.config.roleClusterConfig;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,17 +38,28 @@ public class MedicationController {
     @PostMapping
     public ResponseEntity<?> addMedication(@RequestBody MedicationRequest medicationRequest,
                                            @RequestParam String username) {
+        Logger log = (Logger) LoggerFactory.getLogger(this.getClass());
         try {
+            log.info("Received medication request: {}", medicationRequest);
+            log.info("Validating privileges for username: {}", username);
+
+
             userService.validatePrivileges(username, "editor");
             userService.validateRole(username, roleClusterConfig.getStaff());
+
             MedicationResponse response = medicationService.addMedication(medicationRequest);
+            log.info("Successfully added medication: {}", response);
+
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid medication request");
+            log.error("Invalid medication request: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
+            log.error("An unexpected error occurred: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred");
         }
     }
+
 
     // Get all medications
     @GetMapping
