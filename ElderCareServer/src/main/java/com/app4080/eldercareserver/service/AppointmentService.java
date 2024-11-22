@@ -20,16 +20,21 @@ public class AppointmentService {
 
     private final AppointmentRepository appointmentRepository;
     private final PatientService patientService;
+    private final UserService userService;
 
     @Autowired
     public AppointmentService(AppointmentRepository appointmentRepository,
-                              PatientService patientService) {
+                              PatientService patientService,
+                              UserService userService) {
         this.appointmentRepository = appointmentRepository;
         this.patientService = patientService;
+        this.userService = userService;
     }
 
     private void validateDoctor(User doctor) {
-        if (!"doctor".equals(doctor.getRole())) {
+        if ("doctor".equals(doctor.getRole())) {
+            return;
+        } else {
             throw new IllegalArgumentException("User is not a doctor");
         }
     }
@@ -65,12 +70,10 @@ public class AppointmentService {
 
     @Transactional
     public AppointmentResponse createAppointment(AppointmentRequest requestDTO) {
-        User doctor = new User();
-        doctor.setId(requestDTO.getDoctorId());
+        User doctor = userService.fetchUserById(requestDTO.getDoctorId());
         validateDoctor(doctor);
 
-        Patient patient = new Patient();
-        patient.setId(requestDTO.getPatientId());
+        Patient patient = patientService.findPatientById(requestDTO.getPatientId());
         validatePatient(patient);
 
         if (requestDTO.getAppointmentDate().isBefore(LocalDateTime.now())) {

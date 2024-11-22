@@ -207,5 +207,9 @@ public class UserService {
                 .map(this::convertToResponse)
                 .collect(Collectors.toList());
     }
+
+    public User fetchUserById(Long id) {
+        return userRepository.findById(id).orElseThrow(IllegalArgumentException::new);
+    }
 }
 

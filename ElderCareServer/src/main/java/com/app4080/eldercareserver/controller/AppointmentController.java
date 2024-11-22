@@ -16,6 +16,9 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @RestController
 @RequestMapping("/api/appointments")
 public class AppointmentController {
@@ -23,6 +26,8 @@ public class AppointmentController {
     private final AppointmentService appointmentService;
     private final UserService userService;
     private final PatientService patientService;
+
+    private static final Logger logger = LoggerFactory.getLogger(AppointmentController.class);
 
     @Autowired
     public AppointmentController(AppointmentService appointmentService, UserService userService, PatientService patientService) {
@@ -39,22 +44,33 @@ public class AppointmentController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime appointmentDate,
             @RequestParam String location) {
 
-        User doctor = userService.fetchUserByUsername(doctorUsername);
-        Patient patient = patientService.findPatientById(patientId);
+        logger.info("Received request to create appointment with details - doctorUsername: {}, patientId: {}, appointmentDate: {}, location: {}",
+                doctorUsername, patientId, appointmentDate, location);
 
-        // Create a request DTO
-        AppointmentRequest requestDTO = new AppointmentRequest();
+        try {
+            User doctor = userService.fetchUserByUsername(doctorUsername);
+            Patient patient = patientService.findPatientById(patientId);
 
-        requestDTO.setDoctorId(doctor.getId());
-        requestDTO.setPatientId(patient.getId());
-        requestDTO.setAppointmentDate(appointmentDate);
-        requestDTO.setLocation(location);
-        requestDTO.setStatus("active");
+            // Create a request DTO
+            AppointmentRequest requestDTO = new AppointmentRequest();
+            requestDTO.setDoctorId(doctor.getId());
+            requestDTO.setPatientId(patient.getId());
+            requestDTO.setAppointmentDate(appointmentDate);
+            requestDTO.setLocation(location);
+            requestDTO.setStatus("active");
 
-        // Create appointment using the service
-        AppointmentResponse createdAppointment = appointmentService.createAppointment(requestDTO);
+            logger.debug("AppointmentRequest DTO created: {}", requestDTO);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdAppointment);
+            // Create appointment using the service
+            AppointmentResponse createdAppointment = appointmentService.createAppointment(requestDTO);
+
+            logger.info("Appointment created successfully with ID: {}", createdAppointment.getId());
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdAppointment);
+
+        } catch (Exception e) {
+            logger.error("Error occurred while creating appointment: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
     }
 
     // Get appointments by doctor
