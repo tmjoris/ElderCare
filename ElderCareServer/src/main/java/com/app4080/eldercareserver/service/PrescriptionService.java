@@ -72,6 +72,7 @@ public class PrescriptionService {
     // Create a new prescription
     public PrescriptionResponse addPrescription(PrescriptionRequest request) {
         Prescription prescription = mapToEntity(request);
+        prescription.setCreatedAt(LocalDateTime.now());
         Prescription savedPrescription = prescriptionRepository.save(prescription);
         return mapToResponse(savedPrescription);
     }

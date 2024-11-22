@@ -81,6 +81,7 @@ public class AppointmentService {
         appointment.setDoctor(doctor);
         appointment.setPatient(patient);
 
+        appointment.setCreatedAt(LocalDateTime.now());
         Appointment savedAppointment = appointmentRepository.save(appointment);
         return toResponseDto(savedAppointment);
     }
