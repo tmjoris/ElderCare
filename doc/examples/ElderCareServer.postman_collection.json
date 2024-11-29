@@ -525,7 +525,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8080/api/patients",
+					"raw": "http://localhost:8080/api/patients/login",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -533,7 +533,8 @@
 					"port": "8080",
 					"path": [
 						"api",
-						"patients"
+						"patients",
+						"login"
 					]
 				}
 			},
