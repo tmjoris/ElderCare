@@ -75,7 +75,7 @@ Retrieves all patients.
 ```
 
 ### Get Patient by Login
-`GET /`
+`GET /login`
 
 Retrieves a patient's own information using their login credentials.
 
