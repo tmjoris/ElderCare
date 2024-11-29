@@ -1,0 +1,543 @@
+{
+	"info": {
+		"_postman_id": "3619589b-37cd-4343-be8c-839fdb2c130c",
+		"name": "ElderCareServer",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "37332726"
+	},
+	"item": [
+		{
+			"name": "Get all doctors",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/users/role/doctor",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"users",
+						"role",
+						"doctor"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Cuddy",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\": \"chief\",\r\n    \"firstName\": \"Lisa\",\r\n    \"secondName\": \"Cuddy\",\r\n    \"password\": \"partypants\",\r\n    \"email\": \"lisacuddy@example.com\",\r\n    \"primaryLocation\": \"Princeton-Plainsboro\",\r\n    \"role\": \"doctor\",\r\n    \"privileges\": \"overseer\",\r\n    \"secondaryLocation\": \"\",\r\n    \"phoneNumber\": \"1234567890\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/users/register",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"users",
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create House",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\": \"house\",\r\n    \"firstName\": \"Gregory\",\r\n    \"secondName\": \"House\",\r\n    \"password\": \"vicodin123\",\r\n    \"email\": \"greghouse@example.com\",\r\n    \"primaryLocation\": \"Princeton-Plainsboro\",\r\n    \"role\": \"doctor\",\r\n    \"privileges\": \"admin\",\r\n    \"secondaryLocation\": \"Diagnostic Medicine\",\r\n    \"phoneNumber\": \"1234567891\"\r\n  }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/users/register",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"users",
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Wilson",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\": \"wilson\",\r\n    \"firstName\": \"James\",\r\n    \"secondName\": \"Wilson\",\r\n    \"password\": \"oncology456\",\r\n    \"email\": \"jwilson@example.com\",\r\n    \"primaryLocation\": \"Princeton-Plainsboro\",\r\n    \"role\": \"doctor\",\r\n    \"privileges\": \"admin\",\r\n    \"secondaryLocation\": \"Oncology\",\r\n    \"phoneNumber\": \"1234567892\"\r\n  }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/users/register",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"users",
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Foreman",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\": \"foreman\",\r\n    \"firstName\": \"Eric\",\r\n    \"secondName\": \"Foreman\",\r\n    \"password\": \"neuro789\",\r\n    \"email\": \"eforeman@example.com\",\r\n    \"primaryLocation\": \"Princeton-Plainsboro\",\r\n    \"role\": \"doctor\",\r\n    \"privileges\": \"supervisor\",\r\n    \"secondaryLocation\": \"Diagnostic Medicine\",\r\n    \"phoneNumber\": \"1234567893\"\r\n  }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/users/register",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"users",
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Cameron",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\": \"cameron\",\r\n    \"firstName\": \"Allison\",\r\n    \"secondName\": \"Cameron\",\r\n    \"password\": \"immunology101\",\r\n    \"email\": \"acameron@example.com\",\r\n    \"primaryLocation\": \"Princeton-Plainsboro\",\r\n    \"role\": \"doctor\",\r\n    \"privileges\": \"editor\",\r\n    \"secondaryLocation\": \"Diagnostic Medicine\",\r\n    \"phoneNumber\": \"1234567894\"\r\n  }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/users/register",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"users",
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Patient1",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"firstName\": \"Rebecca\",\r\n    \"lastName\": \"Adler\",\r\n    \"dob\": \"1975-04-15\",\r\n    \"gender\": \"Female\",\r\n    \"address\": \"742 Princeton Ave, New Jersey\",\r\n    \"phoneNumber\": \"609-555-0101\",\r\n    \"emergencyContact\": \"Sarah Adler\",\r\n    \"emergencyContactPhone\": \"609-555-0102\"\r\n  }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/patients?username=cameron",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"patients"
+					],
+					"query": [
+						{
+							"key": "username",
+							"value": "cameron"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Patient1MR",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"patientId\": 1,\r\n  \"doctorId\": 5,\r\n  \"dateOfVisit\": \"2024-11-22T16:00:00\",\r\n  \"location\": \"Princeton-Plainsboro\",\r\n  \"diagnosis\": \"Neurocysticercosis (cerebral tapeworm infection)\",\r\n  \"treatmentPlan\": \"- Prescribed albendazole for parasitic infection\\n- Anti-seizure medication (levetiracetam)\\n- Weekly follow-up for first month\\n- MRI monitoring every 3 months\",\r\n  \"notes\": \"Patient initially presented with seizures and aphasia. Initial symptoms suggested possible brain tumor. MRI revealed lesions consistent with neurocysticercosis. Patient responded well to anti-parasitic treatment. Seizures have subsided with medication.\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/medical-records",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"medical-records"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Presc1",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"medicalRecordId\": 1,\r\n  \"medicationId\": 1,\r\n  \"doctorId\": 5,\r\n  \"instructions\": \"Take one 400mg tablet twice daily with meals. Complete full 30-day course. Report any side effects immediately. Avoid alcohol during treatment.\",\r\n  \"issuedDate\": \"2024-11-22T16:00:00\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/prescriptions",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"prescriptions"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:8080/api/medications?username=cameron",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"medicationName\": \"Albendazole\",\r\n  \"dosage\": \"400mg\",\r\n  \"frequency\": \"Twice daily\",\r\n  \"startDate\": \"2024-11-22T16:00:00\",\r\n  \"endDate\": \"2024-12-22T16:00:00\",\r\n  \"medicalRecordId\": 1\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/medications?username=cameron",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"medications"
+					],
+					"query": [
+						{
+							"key": "username",
+							"value": "cameron"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:8080/api/appointments",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/appointments?doctorUsername=cameron&patientId=1&appointmentDate=2024-11-23T10:00:00&location=Princeton-Plainsboro",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"appointments"
+					],
+					"query": [
+						{
+							"key": "doctorUsername",
+							"value": "cameron"
+						},
+						{
+							"key": "patientId",
+							"value": "1"
+						},
+						{
+							"key": "appointmentDate",
+							"value": "2024-11-23T10:00:00"
+						},
+						{
+							"key": "location",
+							"value": "Princeton-Plainsboro"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:8080/api/progress-reports",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"patientId\": \"1\",\r\n\"caregiverId\": \"5\",\r\n\"date\": \"2024-11-22T14:19:33\",\r\n\"summary\": \"Slow improvement and lingering malaise\",\r\n\"recommendations\": \"Extension of admittance\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/progress-reports",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"progress-reports"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:8080/api/users/login",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\": \"chief\",\r\n    \"password\": \"partypants\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/users/login",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"users",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update cuddy",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"email\": \"lisacuddy@example.com\",\r\n    \"primaryLocation\": \"Princeton-Plainsboro\",\r\n    \"secondaryLocation\": \"Dean of Medicine\",\r\n    \"phoneNumber\": \"1234567890\",\r\n    \"role\": \"doctor\",\r\n    \"privileges\": \"overseer\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/users/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"users",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "create patient",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\": \"ambervolakis\",\r\n    \"firstName\": \"Amber\",\r\n    \"secondName\": \"Volakis\",\r\n    \"password\": \"wilheart\",\r\n    \"email\": \"ambervol@example.com\",\r\n    \"primaryLocation\": \"Princeton-Plainsboro\",\r\n    \"role\": \"patient\",\r\n    \"privileges\": \"viewer\",\r\n    \"secondaryLocation\": \"\",\r\n    \"phoneNumber\": \"1234567890\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/users/register",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"users",
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "create amber",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"firstName\": \"Amber\",\r\n    \"lastName\": \"Volakis\",\r\n    \"dob\": \"1975-04-15\",\r\n    \"gender\": \"Female\",\r\n    \"address\": \"742 Princeton Ave, New Jersey\",\r\n    \"phoneNumber\": \"609-555-0101\",\r\n    \"emergencyContact\": \"James Wilson\",\r\n    \"emergencyContactPhone\": \"609-555-0102\"\r\n  }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/patients?username=wilson",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"patients"
+					],
+					"query": [
+						{
+							"key": "username",
+							"value": "wilson"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "amber patient login",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\": \"ambervolakis\",\r\n    \"password\": \"wilheart\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/patients",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"patients"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
