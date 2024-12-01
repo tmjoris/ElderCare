@@ -7,16 +7,26 @@ import {
   Box,
   Paper,
 } from '@mui/material';
-import axios from 'axios';
 import { showSuccess, showError } from '../ToastConfig';
 
 const NotificationsPage = () => {
   const [notifications, setNotifications] = useState([]);
 
+  // Mock data
+  const mockNotifications = [
+    { id: 1, message: 'Appointment scheduled for tomorrow at 10 AM.' },
+    { id: 2, message: 'Patient John Doe has a new medical report available.' },
+    { id: 3, message: 'System maintenance scheduled for tonight at 2 AM.' },
+  ];
+
   const fetchNotifications = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/notifications'); // Example endpoint
-      setNotifications(response.data);
+      // Uncomment this to use backend
+      // const response = await axios.get('http://localhost:5000/api/notifications');
+      // setNotifications(response.data);
+
+      // Using mock data for now
+      setNotifications(mockNotifications);
     } catch (error) {
       showError('Error fetching notifications');
     }
@@ -24,8 +34,11 @@ const NotificationsPage = () => {
 
   const handleDismiss = async (id) => {
     try {
-      await axios.delete(`http://localhost:5000/api/notifications/${id}`); // Example endpoint
-      setNotifications(notifications.filter((notification) => notification.id !== id));
+      // Uncomment this to use backend
+      // await axios.delete(`http://localhost:5000/api/notifications/${id}`);
+
+      // Remove from mock data
+      setNotifications((prev) => prev.filter((notification) => notification.id !== id));
       showSuccess('Notification dismissed');
     } catch (error) {
       showError('Error dismissing notification');

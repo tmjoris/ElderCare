@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Grid,
   Card,
@@ -11,11 +11,12 @@ import {
   Paper,
 } from '@mui/material';
 import Calendar from 'react-calendar';
+import { useNavigate } from 'react-router-dom';
 import 'react-calendar/dist/Calendar.css';
-import axios from 'axios';
-import { showError } from '../ToastConfig';
+import { showError, showSuccess } from '../ToastConfig';
 
 const DashboardPage = () => {
+  const navigate = useNavigate();
   const [metrics, setMetrics] = useState({
     patientsCount: 0,
     appointmentsCount: 0,
@@ -24,35 +25,39 @@ const DashboardPage = () => {
   const [upcomingAppointments, setUpcomingAppointments] = useState([]);
   const [selectedDate, setSelectedDate] = useState(new Date());
 
-  const fetchMetrics = async () => {
-    try {
-      const patientsResponse = await axios.get('http://localhost:5000/api/patients');
-      const appointmentsResponse = await axios.get('http://localhost:5000/api/appointments');
-      const medicalRecordsResponse = await axios.get('http://localhost:5000/api/medical-records');
+  const presetMetrics = {
+    patientsCount: 3,
+    appointmentsCount: 3,
+    medicalRecordsCount: 3,
+  };
 
-      setMetrics({
-        patientsCount: patientsResponse.data.length,
-        appointmentsCount: appointmentsResponse.data.length,
-        medicalRecordsCount: medicalRecordsResponse.data.length,
-      });
+  const presetAppointments = [
+    { id: 1, patientName: 'John Doe', doctorName: 'Dr. John', appointmentDate: '2024-12-01T10:00:00' },
+    { id: 2, patientName: 'Jane Smith', doctorName: 'Dr. John', appointmentDate: '2024-12-02T14:00:00' },
+    { id: 3, patientName: 'Alice Johnson', doctorName: 'Dr. John', appointmentDate: '2024-12-03T11:00:00' },
+  ];
+
+  const fetchMetrics = useCallback(() => {
+    try {
+      setMetrics(presetMetrics);
+      showSuccess('Metrics loaded successfully');
     } catch (error) {
       showError('Error fetching dashboard metrics');
     }
-  };
+  }, []);
 
-  const fetchUpcomingAppointments = async () => {
+  const fetchUpcomingAppointments = useCallback(() => {
     try {
-      const response = await axios.get('http://localhost:5000/api/appointments/upcoming');
-      setUpcomingAppointments(response.data);
+      setUpcomingAppointments(presetAppointments);
     } catch (error) {
       showError('Error fetching upcoming appointments');
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchMetrics();
     fetchUpcomingAppointments();
-  }, []);
+  }, [fetchMetrics, fetchUpcomingAppointments]);
 
   const handleDateChange = (date) => {
     setSelectedDate(date);
@@ -65,10 +70,11 @@ const DashboardPage = () => {
         backgroundColor: (theme) => theme.palette.background.default,
         borderRadius: '12px',
         boxShadow: 3,
+        minHeight: '100vh',
       }}
     >
       <Typography variant="h4" gutterBottom>
-        Dashboard
+        Doctor Dashboard
       </Typography>
       <Grid container spacing={3}>
         {/* Patients Count */}
@@ -87,11 +93,11 @@ const DashboardPage = () => {
             }}
           >
             <Typography variant="h6">Total Patients</Typography>
-            <Typography variant="h3">{metrics.patientsCount}</Typography>
+            <Typography variant="h3">{metrics.patientsCount || 'N/A'}</Typography>
             <Button
               variant="contained"
               color="primary"
-              href="/patients"
+              onClick={() => navigate('/patients')}
               sx={{ marginTop: '10px' }}
             >
               View Patients
@@ -114,11 +120,11 @@ const DashboardPage = () => {
             }}
           >
             <Typography variant="h6">Appointments</Typography>
-            <Typography variant="h3">{metrics.appointmentsCount}</Typography>
+            <Typography variant="h3">{metrics.appointmentsCount || 'N/A'}</Typography>
             <Button
               variant="contained"
               color="primary"
-              href="/appointments"
+              onClick={() => navigate('/appointments')}
               sx={{ marginTop: '10px' }}
             >
               View Appointments
@@ -141,11 +147,11 @@ const DashboardPage = () => {
             }}
           >
             <Typography variant="h6">Medical Records</Typography>
-            <Typography variant="h3">{metrics.medicalRecordsCount}</Typography>
+            <Typography variant="h3">{metrics.medicalRecordsCount || 'N/A'}</Typography>
             <Button
               variant="contained"
               color="primary"
-              href="/medical-records"
+              onClick={() => navigate('/medical-records')}
               sx={{ marginTop: '10px' }}
             >
               View Records
@@ -172,9 +178,7 @@ const DashboardPage = () => {
                 <ListItem key={appointment.id}>
                   <ListItemText
                     primary={`${appointment.patientName} with ${appointment.doctorName}`}
-                    secondary={`Date: ${new Date(
-                      appointment.appointmentDate
-                    ).toLocaleString()}`}
+                    secondary={`Date: ${new Date(appointment.appointmentDate).toLocaleString()}`}
                   />
                 </ListItem>
               ))}

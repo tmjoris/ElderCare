@@ -1,46 +1,77 @@
-import React, { useState, useEffect } from 'react';
-import { Grid, Card, Typography, Button, Box, Paper, List, ListItem, ListItemText } from '@mui/material';
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  Grid,
+  Card,
+  Typography,
+  Button,
+  Box,
+  Paper,
+  List,
+  ListItem,
+  ListItemText,
+  TextField,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+} from '@mui/material';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
-import axios from 'axios';
 import { showError, showSuccess } from '../ToastConfig';
 
 const CaregiverDashboardPage = () => {
   const [assignedPatients, setAssignedPatients] = useState([]);
   const [reminders, setReminders] = useState([]);
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [newReminder, setNewReminder] = useState('');
+  const [dialogOpen, setDialogOpen] = useState(false);
 
-  const fetchAssignedPatients = async () => {
+  const presetAssignedPatients = [
+    { id: 1, name: 'John Doe', age: 67, condition: 'Diabetes' },
+    { id: 2, name: 'Jane Smith', age: 72, condition: 'Hypertension' },
+  ];
+
+  const presetReminders = [
+    { id: 1, message: 'Administer medication', date: '2024-12-01T10:00:00' },
+    { id: 2, message: 'Blood pressure check', date: '2024-12-02T14:00:00' },
+  ];
+
+  const fetchAssignedPatients = useCallback(() => {
     try {
-      const response = await axios.get('http://localhost:5000/api/caregiver/assigned-patients');
-      setAssignedPatients(response.data);
+      setAssignedPatients(presetAssignedPatients);
+      showSuccess('Assigned patients loaded successfully');
     } catch (error) {
       showError('Error fetching assigned patients');
     }
-  };
+  }, []);
 
-  const fetchReminders = async () => {
+  const fetchReminders = useCallback(() => {
     try {
-      const response = await axios.get('http://localhost:5000/api/caregiver/reminders');
-      setReminders(response.data);
+      setReminders(presetReminders);
+      showSuccess('Reminders loaded successfully');
     } catch (error) {
       showError('Error fetching reminders');
     }
-  };
+  }, []);
 
   const handleDateChange = (date) => {
     setSelectedDate(date);
   };
 
-  const handleAddReminder = async () => {
+  const handleAddReminder = () => {
+    if (!newReminder.trim()) {
+      showError('Please provide a reminder message');
+      return;
+    }
     try {
-      const newReminder = {
+      const newReminderObj = {
+        id: reminders.length + 1,
         date: selectedDate.toISOString(),
-        message: 'Administer medication',
+        message: newReminder.trim(),
       };
-      await axios.post('http://localhost:5000/api/caregiver/reminders', newReminder);
+      setReminders((prev) => [...prev, newReminderObj]);
+      setNewReminder('');
+      setDialogOpen(false);
       showSuccess('Reminder added successfully');
-      fetchReminders();
     } catch (error) {
       showError('Error adding reminder');
     }
@@ -49,10 +80,18 @@ const CaregiverDashboardPage = () => {
   useEffect(() => {
     fetchAssignedPatients();
     fetchReminders();
-  }, []);
+  }, [fetchAssignedPatients, fetchReminders]);
 
   return (
-    <Box sx={{ padding: '20px' }}>
+    <Box
+      sx={{
+        padding: '20px',
+        backgroundColor: (theme) => theme.palette.background.default,
+        borderRadius: '12px',
+        boxShadow: 3,
+        minHeight: '100vh',
+      }}
+    >
       <Typography variant="h4" gutterBottom>
         Caregiver Dashboard
       </Typography>
@@ -62,12 +101,12 @@ const CaregiverDashboardPage = () => {
           <Card
             sx={{
               padding: '20px',
-              boxShadow: '0 4px 10px rgba(0, 0, 0, 0.2)',
-              borderRadius: '12px',
+              boxShadow: 3,
+              borderRadius: 2,
               transition: 'transform 0.3s, box-shadow 0.3s',
               '&:hover': {
-                transform: 'scale(1.02)',
-                boxShadow: '0 8px 15px rgba(0, 0, 0, 0.3)',
+                transform: 'scale(1.05)',
+                boxShadow: 5,
               },
             }}
           >
@@ -96,12 +135,12 @@ const CaregiverDashboardPage = () => {
           <Card
             sx={{
               padding: '20px',
-              boxShadow: '0 4px 10px rgba(0, 0, 0, 0.2)',
-              borderRadius: '12px',
+              boxShadow: 3,
+              borderRadius: 2,
               transition: 'transform 0.3s, box-shadow 0.3s',
               '&:hover': {
-                transform: 'scale(1.02)',
-                boxShadow: '0 8px 15px rgba(0, 0, 0, 0.3)',
+                transform: 'scale(1.05)',
+                boxShadow: 5,
               },
             }}
           >
@@ -125,7 +164,7 @@ const CaregiverDashboardPage = () => {
             <Button
               variant="contained"
               color="primary"
-              onClick={handleAddReminder}
+              onClick={() => setDialogOpen(true)}
               sx={{ marginTop: '10px' }}
             >
               Add Reminder
@@ -139,19 +178,29 @@ const CaregiverDashboardPage = () => {
         <Typography variant="h5" gutterBottom>
           Calendar
         </Typography>
-        <Paper
-          sx={{
-            padding: '20px',
-            boxShadow: '0 4px 10px rgba(0, 0, 0, 0.2)',
-            borderRadius: '12px',
-          }}
-        >
+        <Paper sx={{ padding: '20px', boxShadow: 3, borderRadius: 2 }}>
           <Calendar onChange={handleDateChange} value={selectedDate} />
         </Paper>
       </Box>
+
+      {/* Add Reminder Dialog */}
+      <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Add Reminder</DialogTitle>
+        <DialogContent>
+          <TextField
+            label="Reminder Message"
+            fullWidth
+            value={newReminder}
+            onChange={(e) => setNewReminder(e.target.value)}
+            sx={{ marginBottom: '20px' }}
+          />
+          <Button variant="contained" color="primary" onClick={handleAddReminder}>
+            Save Reminder
+          </Button>
+        </DialogContent>
+      </Dialog>
     </Box>
   );
 };
 
 export default CaregiverDashboardPage;
-
