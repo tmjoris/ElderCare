@@ -14,7 +14,6 @@ import {
   Typography,
   Box,
 } from '@mui/material';
-import axios from 'axios';
 import { showSuccess, showError } from '../ToastConfig';
 import FormInput from '../components/FormInput';
 
@@ -31,10 +30,32 @@ const AppointmentsPage = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [editingId, setEditingId] = useState(null);
 
+  // Preset mock data
+  const mockAppointments = [
+    {
+      id: 1,
+      doctorUsername: 'johndoe',
+      patientId: 'P001',
+      appointmentDate: '2024-12-01T10:00',
+      location: 'Room 101',
+    },
+    {
+      id: 2,
+      doctorUsername: 'janesmith',
+      patientId: 'P002',
+      appointmentDate: '2024-12-02T14:00',
+      location: 'Room 202',
+    },
+  ];
+
   const fetchAppointments = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/appointments');
-      setAppointments(response.data);
+      // Uncomment this when integrating the backend
+      // const response = await axios.get('http://localhost:5000/api/appointments');
+      // setAppointments(response.data);
+
+      // Using mock data
+      setAppointments(mockAppointments);
     } catch (error) {
       showError('Error fetching appointments');
     }
@@ -56,16 +77,28 @@ const AppointmentsPage = () => {
 
     try {
       if (isEditing) {
-        await axios.put(`http://localhost:5000/api/appointments/${editingId}`, newAppointment);
+        // Uncomment this for backend integration
+        // await axios.put(`http://localhost:5000/api/appointments/${editingId}`, newAppointment);
+
+        setAppointments((prev) =>
+          prev.map((appt) =>
+            appt.id === editingId ? { ...appt, ...newAppointment } : appt
+          )
+        );
         showSuccess('Appointment updated successfully');
       } else {
-        await axios.post('http://localhost:5000/api/appointments', newAppointment);
+        // Uncomment this for backend integration
+        // await axios.post('http://localhost:5000/api/appointments', newAppointment);
+
+        setAppointments((prev) => [
+          ...prev,
+          { id: appointments.length + 1, ...newAppointment },
+        ]);
         showSuccess('Appointment added successfully');
       }
       setOpen(false);
       setNewAppointment({ doctorUsername: '', patientId: '', appointmentDate: '', location: '' });
       setIsEditing(false);
-      fetchAppointments();
     } catch (error) {
       showError('Error saving appointment');
     }
@@ -80,9 +113,11 @@ const AppointmentsPage = () => {
 
   const handleDeleteAppointment = async (id) => {
     try {
-      await axios.delete(`http://localhost:5000/api/appointments/${id}`);
+      // Uncomment this for backend integration
+      // await axios.delete(`http://localhost:5000/api/appointments/${id}`);
+
+      setAppointments((prev) => prev.filter((appt) => appt.id !== id));
       showSuccess('Appointment deleted successfully');
-      fetchAppointments();
     } catch (error) {
       showError('Error deleting appointment');
     }
@@ -131,13 +166,7 @@ const AppointmentsPage = () => {
           </TableHead>
           <TableBody>
             {appointments.map((appointment) => (
-              <TableRow
-                key={appointment.id}
-                sx={{
-                  '&:hover': { backgroundColor: '#f1f1f1' },
-                  transition: 'background-color 0.3s ease',
-                }}
-              >
+              <TableRow key={appointment.id}>
                 <TableCell>{appointment.doctorUsername}</TableCell>
                 <TableCell>{appointment.patientId}</TableCell>
                 <TableCell>{appointment.appointmentDate}</TableCell>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Card,
   Typography,
@@ -11,15 +11,30 @@ import {
 import { showSuccess } from '../ToastConfig';
 
 const SettingsPage = () => {
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(
+    JSON.parse(localStorage.getItem('isDarkMode')) || false
+  );
   const [settings, setSettings] = useState({
-    fontSize: 16,
-    notifications: true,
+    fontSize: parseInt(localStorage.getItem('fontSize')) || 16,
+    notifications: JSON.parse(localStorage.getItem('notifications')) || true,
   });
 
+  const userRole = localStorage.getItem('mockRole') || 'guest'; // Role-based settings
+
+  useEffect(() => {
+    // Load initial settings for role if required
+    const initialFontSize = userRole === 'caregiver' ? 18 : 16; // Example customization
+    setSettings((prev) => ({
+      ...prev,
+      fontSize: parseInt(localStorage.getItem('fontSize')) || initialFontSize,
+    }));
+  }, [userRole]);
+
   const handleThemeToggle = () => {
-    setIsDarkMode(!isDarkMode);
-    showSuccess(`Theme switched to ${!isDarkMode ? 'Dark' : 'Light'} Mode`);
+    const newMode = !isDarkMode;
+    setIsDarkMode(newMode);
+    localStorage.setItem('isDarkMode', newMode);
+    showSuccess(`Theme switched to ${newMode ? 'Dark' : 'Light'} Mode`);
   };
 
   const handleSettingsChange = (e) => {
@@ -28,7 +43,8 @@ const SettingsPage = () => {
   };
 
   const handleSaveSettings = () => {
-    // Save settings logic (could involve API calls)
+    localStorage.setItem('fontSize', settings.fontSize);
+    localStorage.setItem('notifications', settings.notifications);
     showSuccess('Settings updated successfully');
   };
 
@@ -90,7 +106,10 @@ const SettingsPage = () => {
             <Switch
               checked={settings.notifications}
               onChange={() =>
-                setSettings({ ...settings, notifications: !settings.notifications })
+                setSettings((prev) => ({
+                  ...prev,
+                  notifications: !prev.notifications,
+                }))
               }
             />
           }

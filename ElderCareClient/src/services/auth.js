@@ -2,35 +2,48 @@ import axios from 'axios';
 
 const BASE_URL = 'http://localhost:5000/api';
 
-const useMockAuthentication = true;
+const useMockAuthentication = true; // Toggle for mock authentication
 
 // Mock data for authentication
+const mockUsers = [
+  { email: 'johndoe@gmail.com', password: 'password12', role: 'doctor' },
+  { email: 'janedoe@gmail.com', password: 'password123', role: 'caregiver' },
+  { email: 'smithrowe@gmail.com', password: 'password1234', role: 'user' },
+];
+
 const mockData = {
-  login: (role) => ({
+  login: (user) => ({
     token: 'mock-token',
-    role,
-    message: `Mock login successful as ${role}`,
+    role: user.role,
+    message: `Mock login successful as ${user.role}`,
   }),
   register: { message: 'Mock signup successful' },
-  profile: {
-    name: 'Mock User',
-    email: 'mockuser@example.com',
-    role: localStorage.getItem('mockRole') || 'caregiver',
-  },
 };
 
 const mockDelay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
+// Authentication services
+
+/**
+ * Log in a user.
+ */
 export const loginUser = async (data) => {
+  // Clear any existing session data
+  localStorage.removeItem('mockToken');
+  localStorage.removeItem('mockRole');
+
   if (useMockAuthentication) {
     await mockDelay(1000);
-    const role = data.role || 'doctor'; // Default to doctor if role isn't specified
+    const user = mockUsers.find(
+      (u) => u.email === data.email && u.password === data.password
+    );
+    if (!user) throw new Error('Invalid email or password');
     localStorage.setItem('mockToken', 'mock-token');
-    localStorage.setItem('mockRole', role);
-    return mockData.login(role);
+    localStorage.setItem('mockRole', user.role);
+    return mockData.login(user);
   }
   try {
-    const response = await axios.post(`${BASE_URL}/login`, data);
+    const response = await axios.post(`${BASE_URL}/auth/login`, data);
     localStorage.setItem('token', response.data.token);
     localStorage.setItem('role', response.data.role);
     return response.data;
@@ -40,14 +53,23 @@ export const loginUser = async (data) => {
   }
 };
 
-
+/**
+ * Register a new user.
+ */
 export const registerUser = async (data) => {
   if (useMockAuthentication) {
     await mockDelay(1000);
+    const existingUser = mockUsers.find((u) => u.email === data.email);
+    if (existingUser) throw new Error('User with this email already exists');
+    mockUsers.push({
+      email: data.email,
+      password: data.password,
+      role: data.role,
+    });
     return mockData.register;
   }
   try {
-    const response = await axios.post(`${BASE_URL}/register`, data);
+    const response = await axios.post(`${BASE_URL}/auth/register`, data);
     return response.data;
   } catch (error) {
     const errorMessage = error.response?.data?.message || 'Signup failed';
@@ -55,10 +77,19 @@ export const registerUser = async (data) => {
   }
 };
 
+/**
+ * Fetch the profile of the currently logged-in user.
+ */
 export const fetchProfile = async () => {
   if (useMockAuthentication) {
     await mockDelay(1000);
-    return mockData.profile;
+    const role = localStorage.getItem('mockRole');
+    if (!role) throw new Error('No role found in session');
+    return {
+      name: `Mock ${role.charAt(0).toUpperCase() + role.slice(1)}`,
+      email: `mock${role}@example.com`,
+      role,
+    };
   }
   try {
     const response = await axios.get(`${BASE_URL}/users/me`, {
@@ -71,6 +102,9 @@ export const fetchProfile = async () => {
   }
 };
 
+/**
+ * Update the profile of the currently logged-in user.
+ */
 export const updateProfile = async (data) => {
   if (useMockAuthentication) {
     await mockDelay(1000);
@@ -85,4 +119,33 @@ export const updateProfile = async (data) => {
     const errorMessage = error.response?.data?.message || 'Failed to update profile';
     throw new Error(errorMessage);
   }
+};
+
+/**
+ * Log out the current user.
+ */
+export const logoutUser = async () => {
+  if (useMockAuthentication) {
+    localStorage.clear(); // Clear all session data
+    return { message: 'Mock logout successful' };
+  }
+  try {
+    await axios.post(`${BASE_URL}/auth/logout`, {}, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+    });
+    localStorage.clear(); // Clear all session data
+    return { message: 'Logout successful' };
+  } catch (error) {
+    const errorMessage = error.response?.data?.message || 'Logout failed';
+    throw new Error(errorMessage);
+  }
+};
+
+// Export all functions together for convenience
+export default {
+  loginUser,
+  registerUser,
+  fetchProfile,
+  updateProfile,
+  logoutUser,
 };

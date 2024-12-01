@@ -11,11 +11,12 @@ import {
   Box,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { registerUser } from '../services/auth';
 import { showSuccess, showError } from '../ToastConfig';
 import FormInput from '../components/FormInput';
 
-const useMockAuthentication = true;
+const useMockAuthentication = true; // Toggle for mock functionality
+
+const mockUsers = []; // Array to simulate a mock user database
 
 const SignupPage = () => {
   const [formData, setFormData] = useState({
@@ -46,26 +47,28 @@ const SignupPage = () => {
     if (!validateForm()) return;
 
     if (useMockAuthentication) {
+      // Mock signup logic
+      const isDuplicate = mockUsers.some((user) => user.email === formData.email);
+      if (isDuplicate) {
+        showError('User already exists!');
+        return;
+      }
+
+      // Add user to mock database
+      mockUsers.push(formData);
       showSuccess('Mock signup successful! Please login.');
-      setFormData({
-        name: '',
-        email: '',
-        password: '',
-        role: '',
-      });
+
+      // Clear form and redirect to login
+      setFormData({ name: '', email: '', password: '', role: '' });
       navigate('/login');
       return;
     }
 
     try {
-      await registerUser(formData);
+      // Backend signup logic (commented out)
+      // await registerUser(formData);
       showSuccess('Signup successful! Please login.');
-      setFormData({
-        name: '',
-        email: '',
-        password: '',
-        role: '',
-      });
+      setFormData({ name: '', email: '', password: '', role: '' });
       navigate('/login');
     } catch (err) {
       showError(err.message || 'Signup failed');
@@ -154,6 +157,7 @@ const SignupPage = () => {
               </MenuItem>
               <MenuItem value="doctor">Doctor</MenuItem>
               <MenuItem value="caregiver">Caregiver</MenuItem>
+              <MenuItem value="patient">Patient</MenuItem>
             </Select>
             {errors.role && (
               <Typography variant="body2" color="error" sx={{ marginTop: '5px' }}>

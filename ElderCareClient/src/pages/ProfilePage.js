@@ -1,9 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Typography, TextField, Button, Box } from '@mui/material';
-import axios from 'axios';
 import { showSuccess, showError } from '../ToastConfig';
 
 const ProfilePage = () => {
+  const mockProfiles = {
+    'johndoe@gmail.com': { name: 'John Doe', email: 'johndoe@gmail.com', phone: '123456789', address: '123 Main Street' },
+    'jane1@gmail.com': { name: 'Jane Smith', email: 'jane1@gmail.com', phone: '987654321', address: '456 Elm Street' },
+    'smithrowe@gmail.com': { name: 'Smith Rowe', email: 'smithrowe@gmail.com', phone: '555123456', address: '789 Oak Avenue' },
+  };
+
   const [profile, setProfile] = useState({
     name: '',
     email: '',
@@ -13,8 +18,15 @@ const ProfilePage = () => {
 
   const fetchProfile = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/profile');
-      setProfile(response.data);
+      // Mock data based on logged-in user
+      const email = localStorage.getItem('mockUserEmail'); // Replace with actual user email from local storage
+      const mockProfile = mockProfiles[email];
+
+      if (mockProfile) {
+        setProfile(mockProfile);
+      } else {
+        throw new Error('Profile not found');
+      }
     } catch (error) {
       showError('Error fetching profile');
     }
@@ -27,7 +39,7 @@ const ProfilePage = () => {
 
   const handleSaveProfile = async () => {
     try {
-      await axios.put('http://localhost:5000/api/profile', profile);
+      // Mock save action
       showSuccess('Profile updated successfully');
     } catch (error) {
       showError('Error updating profile');
@@ -89,6 +101,7 @@ const ProfilePage = () => {
             fullWidth
             variant="outlined"
             sx={{ backgroundColor: 'background.paper' }}
+            disabled
           />
           <TextField
             label="Phone"
