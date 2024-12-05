@@ -9,11 +9,11 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
+  Grid,
   Typography,
   Box,
   Paper,
 } from '@mui/material';
-import axios from 'axios';
 import { showSuccess, showError } from '../ToastConfig';
 import FormInput from '../components/FormInput';
 
@@ -30,14 +30,54 @@ const PatientsPage = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [editingId, setEditingId] = useState(null);
 
-  const fetchPatients = async () => {
-    try {
-      const response = await axios.get('http://localhost:5000/api/patients');
-      setPatients(response.data);
-    } catch (error) {
-      showError('Error fetching patients');
+  const loggedInUserRole = localStorage.getItem('mockRole');
+  const loggedInUserId = localStorage.getItem('mockId');
+
+  // Preset data including caregiver assignments
+  const mockPatients = [
+    {
+      id: 1,
+      firstName: 'John',
+      lastName: 'Doe',
+      dob: '1990-05-15',
+      gender: 'Male',
+      assignedCaregiverId: 'C123', // Caregiver ID
+    },
+    {
+      id: 2,
+      firstName: 'Jane',
+      lastName: 'Smith',
+      dob: '1985-08-20',
+      gender: 'Female',
+      assignedCaregiverId: 'C123', // Caregiver ID
+    },
+    {
+      id: 3,
+      firstName: 'Alice',
+      lastName: 'Brown',
+      dob: '1975-01-10',
+      gender: 'Female',
+      assignedCaregiverId: 'C124',
+    },
+  ];
+
+  useEffect(() => {
+    // Filter patients based on user role
+    let filteredPatients = [];
+    if (loggedInUserRole === 'doctor') {
+      // Doctors see all patients
+      filteredPatients = mockPatients;
+    } else if (loggedInUserRole === 'caregiver') {
+      // Caregivers see only their assigned patients
+      filteredPatients = mockPatients.filter(
+        (patient) => patient.assignedCaregiverId === loggedInUserId
+      );
+    } else if (loggedInUserRole === 'user') {
+      // Users see only their profile
+      filteredPatients = mockPatients.filter((patient) => patient.id === parseInt(loggedInUserId));
     }
-  };
+    setPatients(filteredPatients);
+  }, [loggedInUserRole, loggedInUserId]);
 
   const validateForm = () => {
     const { firstName, lastName, dob, gender } = newPatient;
@@ -50,21 +90,24 @@ const PatientsPage = () => {
     return Object.keys(formErrors).length === 0;
   };
 
-  const handleSavePatient = async () => {
+  const handleSavePatient = () => {
     if (!validateForm()) return;
 
     try {
       if (isEditing) {
-        await axios.put(`http://localhost:5000/api/patients/${editingId}`, newPatient);
+        // Update patient in mock data
+        setPatients((prev) =>
+          prev.map((patient) => (patient.id === editingId ? { ...newPatient, id: editingId } : patient))
+        );
         showSuccess('Patient updated successfully');
       } else {
-        await axios.post('http://localhost:5000/api/patients', newPatient);
+        // Add new patient to mock data
+        setPatients((prev) => [...prev, { ...newPatient, id: Date.now(), assignedCaregiverId: null }]);
         showSuccess('Patient added successfully');
       }
       setOpen(false);
       setNewPatient({ firstName: '', lastName: '', dob: '', gender: '' });
       setIsEditing(false);
-      fetchPatients();
     } catch (error) {
       showError('Error saving patient');
     }
@@ -77,144 +120,139 @@ const PatientsPage = () => {
     setOpen(true);
   };
 
-  const handleDeletePatient = async (id) => {
+  const handleDeletePatient = (id) => {
     try {
-      await axios.delete(`http://localhost:5000/api/patients/${id}`);
+      setPatients((prev) => prev.filter((patient) => patient.id !== id));
       showSuccess('Patient deleted successfully');
-      fetchPatients();
     } catch (error) {
       showError('Error deleting patient');
     }
   };
-
-  useEffect(() => {
-    fetchPatients();
-  }, []);
 
   return (
     <Box
       sx={{
         padding: '20px',
         backgroundColor: (theme) => theme.palette.background.default,
-        minHeight: '100vh',
+        borderRadius: '12px',
+        boxShadow: 3,
       }}
     >
       <Typography variant="h4" gutterBottom>
         Patients
       </Typography>
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={() => setOpen(true)}
-        sx={{
-          marginBottom: '20px',
-          padding: '10px',
-          fontWeight: 'bold',
-        }}
-      >
-        Add Patient
-      </Button>
+      {loggedInUserRole === 'doctor' && (
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => {
+            setIsEditing(false);
+            setNewPatient({ firstName: '', lastName: '', dob: '', gender: '' });
+            setOpen(true);
+          }}
+          sx={{ marginBottom: '20px' }}
+        >
+          Add Patient
+        </Button>
+      )}
       <Paper
         sx={{
           padding: '20px',
-          borderRadius: '12px',
           boxShadow: 3,
+          borderRadius: '12px',
         }}
       >
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell sx={{ fontWeight: 'bold' }}>First Name</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>Last Name</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>Date of Birth</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>Gender</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>Actions</TableCell>
+              <TableCell sx={{ fontWeight: 'bold', color: '#333333' }}>First Name</TableCell>
+              <TableCell sx={{ fontWeight: 'bold', color: '#333333' }}>Last Name</TableCell>
+              <TableCell sx={{ fontWeight: 'bold', color: '#333333' }}>Date of Birth</TableCell>
+              <TableCell sx={{ fontWeight: 'bold', color: '#333333' }}>Gender</TableCell>
+              {loggedInUserRole === 'doctor' && (
+                <TableCell sx={{ fontWeight: 'bold', color: '#333333' }}>Actions</TableCell>
+              )}
             </TableRow>
           </TableHead>
           <TableBody>
             {patients.map((patient) => (
-              <TableRow
-                key={patient.id}
-                sx={{
-                  '&:hover': { backgroundColor: '#f5f5f5' },
-                  transition: 'background-color 0.3s ease',
-                }}
-              >
+              <TableRow key={patient.id}>
                 <TableCell>{patient.firstName}</TableCell>
                 <TableCell>{patient.lastName}</TableCell>
                 <TableCell>{patient.dob}</TableCell>
                 <TableCell>{patient.gender}</TableCell>
-                <TableCell>
-                  <Button
-                    variant="contained"
-                    color="secondary"
-                    onClick={() => handleEditPatient(patient)}
-                    sx={{
-                      marginRight: '10px',
-                      padding: '6px 12px',
-                    }}
-                  >
-                    Edit
-                  </Button>
-                  <Button
-                    variant="contained"
-                    color="error"
-                    onClick={() => handleDeletePatient(patient.id)}
-                  >
-                    Delete
-                  </Button>
-                </TableCell>
+                {loggedInUserRole === 'doctor' && (
+                  <TableCell>
+                    <Button
+                      variant="outlined"
+                      color="secondary"
+                      onClick={() => handleEditPatient(patient)}
+                      sx={{ marginRight: '10px' }}
+                    >
+                      Edit
+                    </Button>
+                    <Button
+                      variant="contained"
+                      color="error"
+                      onClick={() => handleDeletePatient(patient.id)}
+                    >
+                      Delete
+                    </Button>
+                  </TableCell>
+                )}
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </Paper>
 
-      <Dialog open={open} onClose={() => setOpen(false)}>
+      <Dialog open={open} onClose={() => setOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle>{isEditing ? 'Edit Patient' : 'Add Patient'}</DialogTitle>
         <DialogContent>
-          <FormInput
-            label="First Name"
-            value={newPatient.firstName}
-            onChange={(e) => setNewPatient({ ...newPatient, firstName: e.target.value })}
-            error={errors.firstName}
-            helperText={errors.firstName}
-          />
-          <FormInput
-            label="Last Name"
-            value={newPatient.lastName}
-            onChange={(e) => setNewPatient({ ...newPatient, lastName: e.target.value })}
-            error={errors.lastName}
-            helperText={errors.lastName}
-          />
-          <FormInput
-            label="Date of Birth"
-            type="date"
-            value={newPatient.dob}
-            onChange={(e) => setNewPatient({ ...newPatient, dob: e.target.value })}
-            error={errors.dob}
-            helperText={errors.dob}
-          />
-          <FormInput
-            label="Gender"
-            value={newPatient.gender}
-            onChange={(e) => setNewPatient({ ...newPatient, gender: e.target.value })}
-            error={errors.gender}
-            helperText={errors.gender}
-          />
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleSavePatient}
-            sx={{
-              marginTop: '20px',
-              padding: '10px',
-              fontWeight: 'bold',
-              alignSelf: 'center',
-            }}
-          >
-            Save
-          </Button>
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <FormInput
+                label="First Name"
+                value={newPatient.firstName}
+                onChange={(e) => setNewPatient({ ...newPatient, firstName: e.target.value })}
+                error={errors.firstName}
+                helperText={errors.firstName}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <FormInput
+                label="Last Name"
+                value={newPatient.lastName}
+                onChange={(e) => setNewPatient({ ...newPatient, lastName: e.target.value })}
+                error={errors.lastName}
+                helperText={errors.lastName}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <FormInput
+                label="Date of Birth"
+                type="date"
+                value={newPatient.dob}
+                onChange={(e) => setNewPatient({ ...newPatient, dob: e.target.value })}
+                error={errors.dob}
+                helperText={errors.dob}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <FormInput
+                label="Gender"
+                value={newPatient.gender}
+                onChange={(e) => setNewPatient({ ...newPatient, gender: e.target.value })}
+                error={errors.gender}
+                helperText={errors.gender}
+              />
+            </Grid>
+            <Grid item xs={12} sx={{ textAlign: 'center' }}>
+              <Button variant="contained" color="primary" onClick={handleSavePatient}>
+                Save
+              </Button>
+            </Grid>
+          </Grid>
         </DialogContent>
       </Dialog>
     </Box>
@@ -222,3 +260,4 @@ const PatientsPage = () => {
 };
 
 export default PatientsPage;
+

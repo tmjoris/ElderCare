@@ -160,6 +160,7 @@ const SignupPage = () => {
               </MenuItem>
               <MenuItem value="doctor">Doctor</MenuItem>
               <MenuItem value="caregiver">Caregiver</MenuItem>
+              <MenuItem value="patient">Patient</MenuItem>
             </Select>
             {errors.role && (
               <Typography variant="body2" color="error" sx={{ marginTop: '5px' }}>

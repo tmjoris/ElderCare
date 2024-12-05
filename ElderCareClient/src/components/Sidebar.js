@@ -1,142 +1,168 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Drawer,
   List,
   ListItem,
   ListItemText,
   ListItemIcon,
-  Typography,
-  IconButton,
   Divider,
   Box,
+  IconButton,
 } from '@mui/material';
-import { Home, People, Event, History, Settings, Notifications, Menu, LocalHospital } from '@mui/icons-material';
-import { NavLink } from 'react-router-dom';
+import {
+  Home,
+  People,
+  Event,
+  History,
+  Settings,
+  Notifications,
+  Assignment,
+  Medication,
+  ChevronRight,
+  ChevronLeft,
+} from '@mui/icons-material';
+import { NavLink, useLocation } from 'react-router-dom';
 
-const Sidebar = ({ isOpen, onToggle }) => {
-  const [collapsed, setCollapsed] = useState(false);
+const Sidebar = ({ isOpen, onToggleSidebar }) => {
+  const location = useLocation();
+  const userRole = localStorage.getItem('mockRole') || 'guest'; // Retrieve user role from mock authentication
 
-  const toggleSidebar = () => {
-    setCollapsed(!collapsed);
-    if (onToggle) onToggle(!collapsed);
+  // Role-based sidebar item configuration
+  const roleBasedItems = {
+    doctor: [
+      { text: 'Dashboard', icon: <Home />, path: '/dashboard' },
+      { text: 'Patients', icon: <People />, path: '/patients' },
+      { text: 'Appointments', icon: <Event />, path: '/appointments' },
+      { text: 'Medical Records', icon: <History />, path: '/medical-records' },
+      { text: 'Prescriptions & Medication', icon: <Medication />, path: '/prescriptions-medication' },
+      { text: 'Progress Report', icon: <Assignment />, path: '/progress-report' },
+      { text: 'Notifications', icon: <Notifications />, path: '/notifications' },
+      { text: 'Settings', icon: <Settings />, path: '/settings' },
+    ],
+    caregiver: [
+      { text: 'Dashboard', icon: <Home />, path: '/caregiver-dashboard' },
+      { text: 'Patients', icon: <People />, path: '/patients' },
+      { text: 'Progress Report', icon: <Assignment />, path: '/progress-report' },
+      { text: 'Prescriptions & Medication', icon: <Medication />, path: '/prescriptions-medication' },
+      { text: 'Notifications', icon: <Notifications />, path: '/notifications' },
+      { text: 'Settings', icon: <Settings />, path: '/settings' },
+    ],
+    user: [
+      { text: 'Dashboard', icon: <Home />, path: '/user-dashboard' },
+      { text: 'Notifications', icon: <Notifications />, path: '/notifications' },
+      { text: 'Settings', icon: <Settings />, path: '/settings' },
+    ],
   };
 
-  const sidebarItems = [
-    { text: 'Dashboard', icon: <Home />, path: '/dashboard' },
-    { text: 'Patients', icon: <People />, path: '/patients' },
-    { text: 'Appointments', icon: <Event />, path: '/appointments' },
-    { text: 'Medical Records', icon: <History />, path: '/medical-records' },
-    { text: 'Notifications', icon: <Notifications />, path: '/notifications' },
-    { text: 'Settings', icon: <Settings />, path: '/settings' },
-  ];
+  const sidebarItems = roleBasedItems[userRole] || []; // Default to an empty array for unknown roles
 
   return (
-    <Drawer
-      variant="permanent"
+    <Box
       sx={{
-        width: collapsed ? 60 : 240,
-        flexShrink: 0,
-        '& .MuiDrawer-paper': {
-          width: collapsed ? 60 : 240,
-          boxSizing: 'border-box',
-          backgroundColor: '#2C2F33',
-          color: '#FFFFFF',
-          transition: 'width 0.3s ease',
-          overflowX: 'hidden',
-        },
+        position: 'fixed', // Ensures Sidebar stays fixed
+        height: '100vh', // Full viewport height
+        top: 0,
+        zIndex: (theme) => theme.zIndex.drawer + 1, // Below Navbar
       }}
     >
+      {/* Sidebar Toggle Button */}
       <Box
         sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          margin: '10px 0',
+          position: 'absolute',
+          top: '50%',
+          left: isOpen ? '240px' : '60px',
+          transform: 'translateY(-50%)',
+          zIndex: 1300,
+          backgroundColor: '#1E2A38',
+          color: '#FFFFFF',
+          padding: '8px',
+          borderRadius: '50%',
+          cursor: 'pointer',
+          transition: 'left 0.3s ease',
+          boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
         }}
       >
-        {/* Sidebar Toggle Button */}
         <IconButton
-          onClick={toggleSidebar}
-          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          onClick={() => onToggleSidebar(!isOpen)}
           sx={{
-            color: '#7289DA',
-            transition: 'transform 0.3s ease',
+            padding: 0,
+            fontSize: '20px',
+            color: '#FFFFFF',
           }}
         >
-          <Menu />
+          {isOpen ? <ChevronLeft fontSize="small" /> : <ChevronRight fontSize="small" />}
         </IconButton>
-
-        {/* App Name with Icon */}
-        {!collapsed && (
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              margin: '20px 0',
-              color: '#7289DA',
-            }}
-          >
-            <LocalHospital sx={{ marginRight: '8px' }} />
-            <Typography
-              variant="h6"
-              sx={{
-                fontWeight: 'bold',
-                fontSize: '1.2rem',
-              }}
-            >
-              ElderCare
-            </Typography>
-          </Box>
-        )}
       </Box>
 
-      <Divider />
-
-      {/* Sidebar Items */}
-      <List>
-        {sidebarItems.map((item) => (
-          <NavLink
-            to={item.path}
-            key={item.text}
-            style={({ isActive }) => ({
-              textDecoration: 'none',
-              color: isActive ? '#7289DA' : '#FFFFFF',
-            })}
-            aria-label={item.text}
-          >
-            <ListItem
-              button
-              sx={{
-                justifyContent: collapsed ? 'center' : 'flex-start',
-                paddingY: '12px',
-                '&:hover': { backgroundColor: '#3B4149' },
-              }}
+      {/* Sidebar Drawer */}
+      <Drawer
+        variant="permanent"
+        sx={{
+          width: isOpen ? 240 : 60,
+          flexShrink: 0,
+          '& .MuiDrawer-paper': {
+            width: isOpen ? 240 : 60,
+            boxSizing: 'border-box',
+            backgroundColor: '#1E2A38',
+            color: '#FFFFFF',
+            overflowX: 'hidden',
+            transition: 'width 0.3s ease',
+          },
+        }}
+      >
+        <Divider sx={{ borderColor: '#2F3B47' }} />
+        {/* Sidebar Items */}
+        <List>
+          {sidebarItems.map((item) => (
+            <NavLink
+              to={item.path}
+              key={item.text}
+              style={{ textDecoration: 'none' }}
+              aria-label={item.text}
             >
-              <ListItemIcon
+              <ListItem
+                button
+                selected={location.pathname === item.path}
                 sx={{
-                  color: 'inherit',
-                  justifyContent: 'center',
+                  justifyContent: isOpen ? 'flex-start' : 'center',
+                  paddingY: '12px',
+                  paddingX: isOpen ? '16px' : '8px',
+                  '&.Mui-selected': {
+                    backgroundColor: '#2F3B47',
+                    color: '#7289DA',
+                  },
+                  '&:hover': {
+                    backgroundColor: '#2F3B47',
+                  },
                 }}
               >
-                {item.icon}
-              </ListItemIcon>
-              {!collapsed && (
-                <ListItemText
-                  primary={item.text}
-                  primaryTypographyProps={{
-                    sx: {
-                      fontSize: '0.875rem',
-                      fontWeight: 'bold',
-                      color: 'inherit',
-                    },
+                <ListItemIcon
+                  sx={{
+                    color: 'inherit',
+                    justifyContent: 'center',
+                    minWidth: isOpen ? '40px' : 'unset',
                   }}
-                />
-              )}
-            </ListItem>
-          </NavLink>
-        ))}
-      </List>
-    </Drawer>
+                >
+                  {item.icon}
+                </ListItemIcon>
+                {isOpen && (
+                  <ListItemText
+                    primary={item.text}
+                    primaryTypographyProps={{
+                      sx: {
+                        fontSize: '0.875rem',
+                        fontWeight: 'bold',
+                        color: '#FFFFFF',
+                      },
+                    }}
+                  />
+                )}
+              </ListItem>
+            </NavLink>
+          ))}
+        </List>
+      </Drawer>
+    </Box>
   );
 };
 

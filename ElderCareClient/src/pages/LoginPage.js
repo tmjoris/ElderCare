@@ -1,11 +1,20 @@
 import React, { useState } from 'react';
 import { Button, Card, Typography, Container, Box } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { loginUser } from '../services/auth'; // Ensure this is correctly imported
 import { showSuccess, showError } from '../ToastConfig';
 import FormInput from '../components/FormInput';
 
-const useMockAuthentication = true; // Toggle for mock authentication
+const useMockAuthentication = true;
+
+// Preloaded mock users
+const mockUsers = [
+  { email: 'johndoe@gmail.com', password: 'password12', role: 'doctor' },
+  { email: 'johndoe2@gmail.com', password: 'password12', role: 'doctor' },
+  { email: 'jane1@gmail.com', password: 'password123', role: 'caregiver' },
+  { email: 'jane2@gmail.com', password: 'password123', role: 'caregiver' },
+  { email: 'smithrowe@gmail.com', password: 'password1234', role: 'patient' },
+  { email: 'smithrowe2@gmail.com', password: 'password1234', role: 'patient' },
+];
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -16,7 +25,9 @@ const LoginPage = () => {
   const validateForm = () => {
     const formErrors = {};
     if (!email) formErrors.email = 'Email is required';
+    else if (!/\S+@\S+\.\S+/.test(email)) formErrors.email = 'Invalid email format';
     if (!password) formErrors.password = 'Password is required';
+    else if (password.length < 6) formErrors.password = 'Password must be at least 6 characters long';
     setErrors(formErrors);
     return Object.keys(formErrors).length === 0;
   };
@@ -24,30 +35,48 @@ const LoginPage = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
-  
+
+    localStorage.removeItem('mockToken');
+    localStorage.removeItem('mockRole');
+
     if (useMockAuthentication) {
-      localStorage.setItem('mockToken', 'mock-token');
-      const role = localStorage.getItem('mockRole') || 'doctor';
-      showSuccess(`Mock login successful as ${role}`);
-      setEmail('');
-      setPassword('');
-      navigate(role === 'doctor' ? '/dashboard' : '/caregiver-dashboard');
+      const user = mockUsers.find(
+        (u) => u.email === email && u.password === password
+      );
+      if (user) {
+        localStorage.setItem('mockToken', 'mock-token');
+        localStorage.setItem('mockRole', user.role);
+        showSuccess(`Login successful as ${user.role}`);
+        navigate(
+          user.role === 'doctor'
+            ? '/dashboard'
+            : user.role === 'caregiver'
+            ? '/caregiver-dashboard'
+            : '/user-dashboard'
+        );
+      } else {
+        showError('Invalid email or password');
+      }
       return;
     }
-  
-    try {
-      const response = await loginUser({ email, password });
-      localStorage.setItem('token', response.token);
-      localStorage.setItem('role', response.role);
-      showSuccess('Login successful!');
-      setEmail('');
-      setPassword('');
-      navigate(response.role === 'doctor' ? '/dashboard' : '/caregiver-dashboard');
-    } catch (err) {
-      showError(err.message || 'Login failed');
-    }
+
+    // Backend integration logic (commented for mock)
+    // try {
+    //   const response = await loginUser({ email, password });
+    //   localStorage.setItem('token', response.token);
+    //   localStorage.setItem('role', response.role);
+    //   showSuccess('Login successful!');
+    //   navigate(
+    //     response.role === 'doctor'
+    //       ? '/dashboard'
+    //       : response.role === 'caregiver'
+    //       ? '/caregiver-dashboard'
+    //       : '/user-dashboard'
+    //   );
+    // } catch (err) {
+    //   showError(err.message || 'Login failed');
+    // }
   };
-  
 
   return (
     <Container
