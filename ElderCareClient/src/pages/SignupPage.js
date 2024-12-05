@@ -11,28 +11,38 @@ import {
   Box,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { registerUser } from '../services/auth';
+//import { registerUser } from '../services/auth';
 import { showSuccess, showError } from '../ToastConfig';
 import FormInput from '../components/FormInput';
 
-const useMockAuthentication = true;
+//const useMockAuthentication = true;
 
 const SignupPage = () => {
   const [formData, setFormData] = useState({
-    name: '',
+    username: '',
+    firstName: '',
+    secondName: '',
     email: '',
     password: '',
+    primaryLocation: '',
     role: '',
+    privileges: '',
   });
+
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
 
   const validateForm = () => {
     const formErrors = {};
-    if (!formData.name) formErrors.name = 'Name is required';
+    if (!formData.username) formErrors.username = 'Username is required';
+    if (!formData.firstName) formErrors.firstName = 'First Name is required';
+    if (!formData.secondName) formErrors.secondName = 'Second Name is required';
     if (!formData.email) formErrors.email = 'Email is required';
     if (!formData.password) formErrors.password = 'Password is required';
+    if (!formData.primaryLocation)
+      formErrors.primaryLocation = 'Primary Location is required';
     if (!formData.role) formErrors.role = 'Role is required';
+    if (!formData.privileges) formErrors.privileges = 'Privileges are required';
     setErrors(formErrors);
     return Object.keys(formErrors).length === 0;
   };
@@ -45,30 +55,32 @@ const SignupPage = () => {
     e.preventDefault();
     if (!validateForm()) return;
 
-    if (useMockAuthentication) {
-      showSuccess('Mock signup successful! Please login.');
-      setFormData({
-        name: '',
-        email: '',
-        password: '',
-        role: '',
-      });
-      navigate('/login');
-      return;
-    }
-
     try {
-      await registerUser(formData);
+      const response = await fetch('http://localhost:8080/api/users/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        const { message } = await response.json();
+        throw new Error(message || 'Signup failed');
+      }
+
       showSuccess('Signup successful! Please login.');
       setFormData({
-        name: '',
+        username: '',
+        firstName: '',
+        secondName: '',
         email: '',
         password: '',
+        primaryLocation: '',
         role: '',
+        privileges: '',
       });
       navigate('/login');
     } catch (err) {
-      showError(err.message || 'Signup failed');
+      showError(err.message);
     }
   };
 
@@ -115,32 +127,26 @@ const SignupPage = () => {
             marginTop: '20px',
           }}
         >
-          <FormInput
-            label="Name"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            error={!!errors.name}
-            helperText={errors.name}
-          />
-          <FormInput
-            label="Email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            type="email"
-            error={!!errors.email}
-            helperText={errors.email}
-          />
-          <FormInput
-            label="Password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            type="password"
-            error={!!errors.password}
-            helperText={errors.password}
-          />
+          {[
+            { label: 'Username', name: 'username' },
+            { label: 'First Name', name: 'firstName' },
+            { label: 'Second Name', name: 'secondName' },
+            { label: 'Email', name: 'email', type: 'email' },
+            { label: 'Password', name: 'password', type: 'password' },
+            { label: 'Primary Location', name: 'primaryLocation' },
+          ].map((field) => (
+            <FormInput
+              key={field.name}
+              label={field.label}
+              name={field.name}
+              value={formData[field.name]}
+              onChange={handleChange}
+              type={field.type || 'text'}
+              error={!!errors[field.name]}
+              helperText={errors[field.name]}
+            />
+          ))}
+
           <FormControl fullWidth margin="normal" error={!!errors.role}>
             <InputLabel>Role</InputLabel>
             <Select
@@ -161,6 +167,32 @@ const SignupPage = () => {
               </Typography>
             )}
           </FormControl>
+
+          <FormControl fullWidth margin="normal" error={!!errors.privileges}>
+            <InputLabel>Privileges</InputLabel>
+            <Select
+              name="privileges"
+              value={formData.privileges}
+              onChange={handleChange}
+              sx={{ borderRadius: '8px' }}
+            >
+              <MenuItem value="">
+                <em>Select Privileges</em>
+              </MenuItem>
+              <MenuItem value="viewer">Viewer</MenuItem>
+              <MenuItem value="editor">Editor</MenuItem>
+              <MenuItem value="supervisor">Supervisor</MenuItem>
+              <MenuItem value="admin">Admin</MenuItem>
+
+
+            </Select>
+            {errors.privileges && (
+              <Typography variant="body2" color="error" sx={{ marginTop: '5px' }}>
+                {errors.privileges}
+              </Typography>
+            )}
+          </FormControl>
+
           <Button
             type="submit"
             variant="contained"
