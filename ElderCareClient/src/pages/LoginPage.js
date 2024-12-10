@@ -43,7 +43,8 @@ const LoginPage = () => {
       if (response.status === 200) {
         const { role, message, token } = response.data;
         localStorage.setItem('mockRole', role);
-        localStorage.setItem('mockToken', token)
+        localStorage.setItem('mockToken', token);
+        localStorage.setItem('username', username);
         
         setUserRole(role);
         setIsAuthenticated(true);

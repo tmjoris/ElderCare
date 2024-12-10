@@ -1,33 +1,46 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Typography, TextField, Button, Box } from '@mui/material';
+import axios from 'axios';
 import { showSuccess, showError } from '../ToastConfig';
 
 const ProfilePage = () => {
-  const mockProfiles = {
-    'johndoe@gmail.com': { name: 'John Doe', email: 'johndoe@gmail.com', phone: '123456789', address: '123 Main Street' },
-    'jane1@gmail.com': { name: 'Jane Smith', email: 'jane1@gmail.com', phone: '987654321', address: '456 Elm Street' },
-    'smithrowe@gmail.com': { name: 'Smith Rowe', email: 'smithrowe@gmail.com', phone: '555123456', address: '789 Oak Avenue' },
-  };
-
   const [profile, setProfile] = useState({
-    name: '',
+    id: '',
+    username: '',
+    firstName: '',
+    secondName: '',
     email: '',
-    phone: '',
-    address: '',
+    primaryLocation: '',
+    secondaryLocation: '',
+    phoneNumber: '',
+    role: '',
+    privileges: '',
+    createdAt: '',
   });
 
   const fetchProfile = async () => {
     try {
-      // Mock data based on logged-in user
-      const email = localStorage.getItem('mockUserEmail'); // Replace with actual user email from local storage
-      const mockProfile = mockProfiles[email];
+      const username = localStorage.getItem('username'); // Replace with actual logic to get the logged-in user's username
+      const response = await axios.get(`http://localhost:8080/api/users/username/${username}`);
+      const userData = response.data;
 
-      if (mockProfile) {
-        setProfile(mockProfile);
-      } else {
-        throw new Error('Profile not found');
-      }
+      setProfile({
+        id: userData.id || '',
+        username: userData.username || '',
+        firstName: userData.firstName || '',
+        secondName: userData.secondName || '',
+        email: userData.email || '',
+        primaryLocation: userData.primaryLocation || '',
+        secondaryLocation: userData.secondaryLocation || '',
+        phoneNumber: userData.phoneNumber || '',
+        role: userData.role || '',
+        privileges: userData.privileges || '',
+        createdAt: userData.createdAt || '',
+      });
+
+      showSuccess('Profile loaded successfully');
     } catch (error) {
+      console.error('Error fetching profile:', error);
       showError('Error fetching profile');
     }
   };
@@ -39,9 +52,24 @@ const ProfilePage = () => {
 
   const handleSaveProfile = async () => {
     try {
-      // Mock save action
+      const updatedProfile = {
+        id: profile.id,
+        username: profile.username,
+        firstName: profile.firstName,
+        secondName: profile.secondName,
+        email: profile.email,
+        primaryLocation: profile.primaryLocation,
+        secondaryLocation: profile.secondaryLocation,
+        phoneNumber: profile.phoneNumber,
+        role: profile.role,
+        privileges: profile.privileges,
+        createdAt: profile.createdAt,
+      };
+
+      await axios.put(`http://localhost:8080/api/users/username/${profile.username}`, updatedProfile);
       showSuccess('Profile updated successfully');
     } catch (error) {
+      console.error('Error updating profile:', error);
       showError('Error updating profile');
     }
   };
@@ -68,11 +96,6 @@ const ProfilePage = () => {
           boxShadow: 3,
           borderRadius: '12px',
           backgroundColor: (theme) => theme.palette.background.paper,
-          transition: 'transform 0.3s, box-shadow 0.3s',
-          '&:hover': {
-            transform: 'scale(1.02)',
-            boxShadow: '0 8px 15px rgba(0, 0, 0, 0.3)',
-          },
         }}
       >
         <Box
@@ -85,13 +108,38 @@ const ProfilePage = () => {
           }}
         >
           <TextField
-            label="Name"
-            name="name"
-            value={profile.name}
+            label="ID"
+            name="id"
+            value={profile.id}
             onChange={handleProfileChange}
             fullWidth
             variant="outlined"
-            sx={{ backgroundColor: 'background.paper' }}
+            disabled
+          />
+          <TextField
+            label="Username"
+            name="username"
+            value={profile.username}
+            onChange={handleProfileChange}
+            fullWidth
+            variant="outlined"
+            disabled
+          />
+          <TextField
+            label="First Name"
+            name="firstName"
+            value={profile.firstName}
+            onChange={handleProfileChange}
+            fullWidth
+            variant="outlined"
+          />
+          <TextField
+            label="Second Name"
+            name="secondName"
+            value={profile.secondName}
+            onChange={handleProfileChange}
+            fullWidth
+            variant="outlined"
           />
           <TextField
             label="Email"
@@ -100,26 +148,58 @@ const ProfilePage = () => {
             onChange={handleProfileChange}
             fullWidth
             variant="outlined"
-            sx={{ backgroundColor: 'background.paper' }}
             disabled
           />
           <TextField
-            label="Phone"
-            name="phone"
-            value={profile.phone}
+            label="Primary Location"
+            name="primaryLocation"
+            value={profile.primaryLocation}
             onChange={handleProfileChange}
             fullWidth
             variant="outlined"
-            sx={{ backgroundColor: 'background.paper' }}
           />
           <TextField
-            label="Address"
-            name="address"
-            value={profile.address}
+            label="Secondary Location"
+            name="secondaryLocation"
+            value={profile.secondaryLocation}
             onChange={handleProfileChange}
             fullWidth
             variant="outlined"
-            sx={{ backgroundColor: 'background.paper' }}
+          />
+          <TextField
+            label="Phone Number"
+            name="phoneNumber"
+            value={profile.phoneNumber}
+            onChange={handleProfileChange}
+            fullWidth
+            variant="outlined"
+          />
+          <TextField
+            label="Role"
+            name="role"
+            value={profile.role}
+            onChange={handleProfileChange}
+            fullWidth
+            variant="outlined"
+            disabled
+          />
+          <TextField
+            label="Privileges"
+            name="privileges"
+            value={profile.privileges}
+            onChange={handleProfileChange}
+            fullWidth
+            variant="outlined"
+            disabled
+          />
+          <TextField
+            label="Created At"
+            name="createdAt"
+            value={profile.createdAt}
+            onChange={handleProfileChange}
+            fullWidth
+            variant="outlined"
+            disabled
           />
           <Button
             variant="contained"
