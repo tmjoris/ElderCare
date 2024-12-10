@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { ThemeProvider } from '@mui/material/styles';
 import theme from './styles/theme';
@@ -8,6 +8,14 @@ import SignupPage from './pages/SignupPage';
 import DashboardPage from './pages/DashboardPage';
 import CaregiverDashboardPage from './pages/CaregiverDashboardPage';
 import UserDashboardPage from './pages/UserDashboardPage';
+import PatientsPage from './pages/PatientsPage';
+import AppointmentsPage from './pages/AppointmentsPage';
+import MedicalRecordsPage from './pages/MedicalRecordsPage';
+import ProgressReportPage from './pages/ProgressReportPage';
+import PrescriptionsAndMedicationPage from './pages/PrescriptionsAndMedicationPage';
+import SettingsPage from './pages/SettingsPage';
+import ProfilePage from './pages/ProfilePage';
+import NotificationsPage from './pages/NotificationsPage';
 import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar';
 import { ToastNotification } from './ToastConfig';
@@ -16,31 +24,10 @@ function AppContent() {
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false); // Sidebar starts collapsed
 
-  const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('mockToken'));
-  const [userRole, setUserRole] = useState(localStorage.getItem('mockRole') || 'guest');
-
-  useEffect(() => {
-    const role = localStorage.getItem('mockRole');
-    const token = localStorage.getItem('mockToken');
-    setUserRole(role || 'guest');
-    setIsAuthenticated(!!token);
-  }, []);
+  const isAuthenticated = localStorage.getItem('mockToken');
+  const userRole = localStorage.getItem('mockRole') || 'guest';
 
   const hideSidebarAndNavbar = ['/login', '/signup'].includes(location.pathname);
-
-  const handleRoleRedirect = () => {
-    if (!isAuthenticated) return '/login';
-    switch (userRole) {
-      case 'doctor':
-        return '/dashboard';
-      case 'caregiver':
-        return '/caregiver-dashboard';
-      case 'user':
-        return '/user-dashboard';
-      default:
-        return '/login';
-    }
-  };
 
   return (
     <>
@@ -63,15 +50,33 @@ function AppContent() {
         }}
       >
         <Routes>
-          <Route
-            path="/"
-            element={<Navigate to={handleRoleRedirect()} replace />}
-          />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
-          <Route path="/dashboard" element={isAuthenticated && userRole === 'doctor' ? <DashboardPage /> : <Navigate to="/login" />} />
-          <Route path="/caregiver-dashboard" element={isAuthenticated && userRole === 'caregiver' ? <CaregiverDashboardPage /> : <Navigate to="/login" />} />
-          <Route path="/user-dashboard" element={isAuthenticated && userRole === 'user' ? <UserDashboardPage /> : <Navigate to="/login" />} />
+          <Route
+            path="/dashboard"
+            element={isAuthenticated && userRole === 'doctor' ? <DashboardPage /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/caregiver-dashboard"
+            element={isAuthenticated && userRole === 'caregiver' ? <CaregiverDashboardPage /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/patient-dashboard"
+            element={isAuthenticated && userRole === 'patient' ? <UserDashboardPage /> : <Navigate to="/login" />}
+          />
+          {/* Core Functionality Routes */}
+          {isAuthenticated && (
+            <>
+              <Route path="/patients" element={<PatientsPage />} />
+              <Route path="/appointments" element={<AppointmentsPage />} />
+              <Route path="/medical-records" element={<MedicalRecordsPage />} />
+              <Route path="/progress-report" element={<ProgressReportPage />} />
+              <Route path="/prescriptions-medication" element={<PrescriptionsAndMedicationPage />} />
+              <Route path="/settings" element={<SettingsPage />} />
+              <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/notifications" element={<NotificationsPage />} />
+            </>
+          )}
         </Routes>
       </div>
     </>
