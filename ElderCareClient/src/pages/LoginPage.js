@@ -3,7 +3,7 @@ import { Button, Card, Typography, Container, Box } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { showSuccess, showError } from '../ToastConfig';
 import FormInput from '../components/FormInput';
-import axios from 'axios'; // Ensure axios is installed and imported
+import axios from 'axios';
 
 const LoginPage = () => {
   const [username, setUsername] = useState('');
@@ -14,7 +14,6 @@ const LoginPage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Initial check for auth status and role from localStorage
     const role = localStorage.getItem('mockRole');
     const token = localStorage.getItem('mockToken');
     setUserRole(role || 'guest');

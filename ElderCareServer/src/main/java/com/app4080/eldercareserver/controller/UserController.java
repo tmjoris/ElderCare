@@ -80,7 +80,6 @@ public class UserController {
         try {
             userService.login(loginRequest);
 
-            // Fetch user details by username
             User user = userService.fetchUserByUsername(loginRequest.getUsername());
             String role = user.getRole().toLowerCase();
             String token = generateToken(user);
@@ -91,7 +90,6 @@ public class UserController {
             response.put("role", role);
             response.put("token", token);
 
-            // Return response with status 200 OK
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException | AccessDeniedException e) {
             Map<String, String> errorResponse = new HashMap<>();
@@ -102,18 +100,18 @@ public class UserController {
 
     @SuppressWarnings("deprecation")
     private String generateToken(User user) {
-        // Set expiration time for the token (e.g., 1 hour)
-        long expirationTime = 1000 * 60 * 60 * 12; // 1 hour in milliseconds
+        // Set expiration time for the token 12 hours)
+        long expirationTime = 1000 * 60 * 60 * 12;
 
         Key secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS256);
 
     
         return Jwts.builder()
-                .setSubject(user.getUsername()) // Set the username as the subject
-                .claim("role", user.getRole())  // Add custom claims like the role
+                .setSubject(user.getUsername())
+                .claim("role", user.getRole())
                 .setIssuedAt(new Date(expirationTime))
                 .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
-                .signWith(secretKey) // Use a secret key
+                .signWith(secretKey) 
                 .compact();
     }
 
