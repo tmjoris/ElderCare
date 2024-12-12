@@ -154,7 +154,7 @@ public class PatientService {
 
     public PatientResponse getPatientRecord(LoginRequest loginRequest) throws AccessDeniedException {
         // Authenticate user and retrieve user details
-        userService.login(loginRequest); // This performs login, assuming it throws an exception if failed
+        userService.login(loginRequest); // This performs login, throws an exception if failed
 
         User user = userService.fetchUserByUsername(loginRequest.getUsername());
 
@@ -168,6 +168,20 @@ public class PatientService {
                 .orElseThrow(() -> new IllegalArgumentException("Patient record not found"));
 
         // Convert and return the patient information as a PatientResponse DTO
+        return convertToResponseDto(patient);
+    }
+
+    public PatientResponse getPatientRecordStaff(String fname, String lname){
+        Patient patient = patientRepository.findByFirstNameAndLastName(fname, lname)
+                .orElseThrow(() -> new IllegalArgumentException("Patient record not found"));
+
+        return convertToResponseDto(patient);
+    }
+
+    public PatientResponse getPatientRecordStaff(Long patientId){
+        Patient patient = patientRepository.findById(patientId)
+                .orElseThrow(() -> new IllegalArgumentException("Patient does not exist"));
+
         return convertToResponseDto(patient);
     }
 
