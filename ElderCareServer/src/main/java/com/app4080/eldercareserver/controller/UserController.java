@@ -7,6 +7,11 @@ import com.app4080.eldercareserver.dto.user.LoginRequest;
 import com.app4080.eldercareserver.entity.User;
 import com.app4080.eldercareserver.repository.UserRepository;
 import com.app4080.eldercareserver.service.UserService;
+
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
+import java.security.Key;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,7 +19,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.nio.file.AccessDeniedException;
+import java.sql.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/users")
@@ -68,14 +76,45 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<Map<String, String>> login(@RequestBody LoginRequest loginRequest) {
         try {
             userService.login(loginRequest);
-            return ResponseEntity.ok("Login successful");
+
+            User user = userService.fetchUserByUsername(loginRequest.getUsername());
+            String role = user.getRole().toLowerCase();
+            String token = generateToken(user);
+
+            Map<String, String> response = new HashMap<>();
+        
+            response.put("message", "Login successful");
+            response.put("role", role);
+            response.put("token", token);
+
+            return ResponseEntity.ok(response);
         } catch (IllegalArgumentException | AccessDeniedException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
-        }
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+        }        
     }
+
+    @SuppressWarnings("deprecation")
+    private String generateToken(User user) {
+        // Set expiration time for the token 12 hours)
+        long expirationTime = 1000 * 60 * 60 * 12;
+
+        Key secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+
+    
+        return Jwts.builder()
+                .setSubject(user.getUsername())
+                .claim("role", user.getRole())
+                .setIssuedAt(new Date(expirationTime))
+                .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
+                .signWith(secretKey) 
+                .compact();
+    }
+
 
     @GetMapping("/username/{username}")
     public ResponseEntity<UserResponse> findByUsername(@PathVariable String username) {
