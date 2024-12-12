@@ -76,8 +76,7 @@ public class AppointmentController {
     // Get appointments by doctor
     @GetMapping("/doctor/{doctorId}")
     public ResponseEntity<List<AppointmentResponse>> getAppointmentsByDoctor(@PathVariable Long doctorId) {
-        User doctor = new User();
-        doctor.setId(doctorId);
+        User doctor = userService.fetchUserById(doctorId);
 
         List<AppointmentResponse> appointments = appointmentService.getAppointmentsByDoctor(doctor);
         return ResponseEntity.ok(appointments);
