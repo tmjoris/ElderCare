@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { ThemeProvider } from '@mui/material/styles';
 import theme from './styles/theme';
@@ -20,6 +20,8 @@ import NotificationsPage from './pages/NotificationsPage';
 import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar';
 import { ToastNotification } from './ToastConfig';
+import { useNavigate } from 'react-router-dom';
+
 
 function AppContent() {
   const location = useLocation();
@@ -29,6 +31,13 @@ function AppContent() {
   const userRole = localStorage.getItem('mockRole') || 'guest';
 
   const hideSidebarAndNavbar = ['/login', '/signup'].includes(location.pathname);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+  if (location.pathname === '/') {
+    navigate('/login');
+  }
+  }, [location, navigate]);
 
   return (
     <>

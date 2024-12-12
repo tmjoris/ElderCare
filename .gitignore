@@ -6,6 +6,7 @@ HELP.md
 ElderCareServer/.gradle/
 ElderCareServer/build/
 ElderCareServer/gradle/
+**/build.gradle
 gradlew.bat
 gradlew
 
