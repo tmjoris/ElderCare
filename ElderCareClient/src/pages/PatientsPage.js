@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import {
   Table,
   TableBody,
@@ -7,6 +8,7 @@ import {
   TableRow,
   Button,
   Dialog,
+  DialogActions,
   DialogTitle,
   DialogContent,
   Grid,
@@ -25,99 +27,81 @@ const PatientsPage = () => {
     lastName: '',
     dob: '',
     gender: '',
+    address: '',
+    phoneNumber: '',
+    emergencyContact: '',
+    emergencyContactPhone: '',
   });
   const [errors, setErrors] = useState({});
   const [isEditing, setIsEditing] = useState(false);
-  const [editingId, setEditingId] = useState(null);
-
   const loggedInUserRole = localStorage.getItem('mockRole');
-  const loggedInUserId = localStorage.getItem('mockId');
+  const loggedInUser = localStorage.getItem('username');
+  const apiUrl = 'http://localhost:8080/api/patients';
 
-  // Preset data including caregiver assignments
-  const mockPatients = [
-    {
-      id: 1,
-      firstName: 'John',
-      lastName: 'Doe',
-      dob: '1990-05-15',
-      gender: 'Male',
-      assignedCaregiverId: 'C123', // Caregiver ID
-    },
-    {
-      id: 2,
-      firstName: 'Jane',
-      lastName: 'Smith',
-      dob: '1985-08-20',
-      gender: 'Female',
-      assignedCaregiverId: 'C123', // Caregiver ID
-    },
-    {
-      id: 3,
-      firstName: 'Alice',
-      lastName: 'Brown',
-      dob: '1975-01-10',
-      gender: 'Female',
-      assignedCaregiverId: 'C124',
-    },
-  ];
-
+  // Fetch patients when the component mounts
   useEffect(() => {
-    // Filter patients based on user role
-    let filteredPatients = [];
-    if (loggedInUserRole === 'doctor') {
-      // Doctors see all patients
-      filteredPatients = mockPatients;
-    } else if (loggedInUserRole === 'caregiver') {
-      // Caregivers see only their assigned patients
-      filteredPatients = mockPatients.filter(
-        (patient) => patient.assignedCaregiverId === loggedInUserId
-      );
-    } else if (loggedInUserRole === 'user') {
-      // Users see only their profile
-      filteredPatients = mockPatients.filter((patient) => patient.id === parseInt(loggedInUserId));
-    }
-    setPatients(filteredPatients);
-  }, [loggedInUserRole, loggedInUserId]);
+    const fetchPatients = async () => {
+      try {
+        const response = await axios.get(apiUrl, {
+          params: { username: loggedInUser },
+        });
+        setPatients(response.data); // Populate patients with the API response
+      } catch (error) {
+        showError('Failed to fetch patients');
+        console.error(error);
+      }
+    };
+
+    fetchPatients();
+  }, [loggedInUser]);
 
   const validateForm = () => {
-    const { firstName, lastName, dob, gender } = newPatient;
+    const { firstName, lastName, dob, gender, address, phoneNumber, emergencyContact, emergencyContactPhone } = newPatient;
     const formErrors = {};
     if (!firstName) formErrors.firstName = 'First name is required';
     if (!lastName) formErrors.lastName = 'Last name is required';
     if (!dob) formErrors.dob = 'Date of birth is required';
     if (!gender) formErrors.gender = 'Gender is required';
+    if (!address) formErrors.address = 'Address is required';
+    if (!phoneNumber) formErrors.phoneNumber = 'Phone number is required';
+    if (!emergencyContact) formErrors.emergencyContact = 'Emergency contact is required';
+    if (!emergencyContactPhone) formErrors.emergencyContactPhone = 'Emergency contact phone number is required';
     setErrors(formErrors);
     return Object.keys(formErrors).length === 0;
   };
 
-  const handleSavePatient = () => {
+  const handleSavePatient = async () => {
     if (!validateForm()) return;
 
     try {
       if (isEditing) {
-        // Update patient in mock data
-        setPatients((prev) =>
-          prev.map((patient) => (patient.id === editingId ? { ...newPatient, id: editingId } : patient))
-        );
-        showSuccess('Patient updated successfully');
+        // Handle editing logic here if needed
+        showError('Editing patients is not yet implemented with the API');
       } else {
-        // Add new patient to mock data
-        setPatients((prev) => [...prev, { ...newPatient, id: Date.now(), assignedCaregiverId: null }]);
+        // Add a new patient
+        const response = await axios.post(
+          `${apiUrl}?username=${loggedInUser}`,
+          newPatient
+        );
+        setPatients((prev) => [...prev, response.data]); // Add the new patient to the list
         showSuccess('Patient added successfully');
       }
       setOpen(false);
-      setNewPatient({ firstName: '', lastName: '', dob: '', gender: '' });
+      setNewPatient({
+        firstName: '',
+        lastName: '',
+        dob: '',
+        gender: '',
+        address: '',
+        phoneNumber: '',
+        emergencyContact: '',
+        emergencyContactPhone: '',
+      });
       setIsEditing(false);
     } catch (error) {
       showError('Error saving patient');
+      console.error(error);
     }
-  };
-
-  const handleEditPatient = (patient) => {
-    setNewPatient(patient);
-    setEditingId(patient.id);
-    setIsEditing(true);
-    setOpen(true);
   };
 
   const handleDeletePatient = (id) => {
@@ -147,7 +131,16 @@ const PatientsPage = () => {
           color="primary"
           onClick={() => {
             setIsEditing(false);
-            setNewPatient({ firstName: '', lastName: '', dob: '', gender: '' });
+            setNewPatient({
+              firstName: '',
+              lastName: '',
+              dob: '',
+              gender: '',
+              address: '',
+              phoneNumber: '',
+              emergencyContact: '',
+              emergencyContactPhone: '',
+            });
             setOpen(true);
           }}
           sx={{ marginBottom: '20px' }}
@@ -169,6 +162,10 @@ const PatientsPage = () => {
               <TableCell sx={{ fontWeight: 'bold', color: '#333333' }}>Last Name</TableCell>
               <TableCell sx={{ fontWeight: 'bold', color: '#333333' }}>Date of Birth</TableCell>
               <TableCell sx={{ fontWeight: 'bold', color: '#333333' }}>Gender</TableCell>
+              <TableCell sx={{ fontWeight: 'bold', color: '#333333' }}>Address</TableCell>
+              <TableCell sx={{ fontWeight: 'bold', color: '#333333' }}>Phone Number</TableCell>
+              <TableCell sx={{ fontWeight: 'bold', color: '#333333' }}>Emergency Contact</TableCell>
+              <TableCell sx={{ fontWeight: 'bold', color: '#333333' }}>Emergency Contact Phone</TableCell>
               {loggedInUserRole === 'doctor' && (
                 <TableCell sx={{ fontWeight: 'bold', color: '#333333' }}>Actions</TableCell>
               )}
@@ -181,12 +178,16 @@ const PatientsPage = () => {
                 <TableCell>{patient.lastName}</TableCell>
                 <TableCell>{patient.dob}</TableCell>
                 <TableCell>{patient.gender}</TableCell>
+                <TableCell>{patient.address}</TableCell>
+                <TableCell>{patient.phoneNumber}</TableCell>
+                <TableCell>{patient.emergencyContact}</TableCell>
+                <TableCell>{patient.emergencyContactPhone}</TableCell>
                 {loggedInUserRole === 'doctor' && (
                   <TableCell>
                     <Button
                       variant="outlined"
                       color="secondary"
-                      onClick={() => handleEditPatient(patient)}
+                      onClick={() => console.log('Edit functionality pending')}
                       sx={{ marginRight: '10px' }}
                     >
                       Edit
@@ -247,17 +248,55 @@ const PatientsPage = () => {
                 helperText={errors.gender}
               />
             </Grid>
-            <Grid item xs={12} sx={{ textAlign: 'center' }}>
-              <Button variant="contained" color="primary" onClick={handleSavePatient}>
-                Save
-              </Button>
+            <Grid item xs={12}>
+              <FormInput
+                label="Address"
+                value={newPatient.address}
+                onChange={(e) => setNewPatient({ ...newPatient, address: e.target.value })}
+                error={errors.address}
+                helperText={errors.address}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <FormInput
+                label="Phone Number"
+                value={newPatient.phoneNumber}
+                onChange={(e) => setNewPatient({ ...newPatient, phoneNumber: e.target.value })}
+                error={errors.phoneNumber}
+                helperText={errors.phoneNumber}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <FormInput
+                label="Emergency Contact"
+                value={newPatient.emergencyContact}
+                onChange={(e) => setNewPatient({ ...newPatient, emergencyContact: e.target.value })}
+                error={errors.emergencyContact}
+                helperText={errors.emergencyContact}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <FormInput
+                label="Emergency Contact Phone"
+                value={newPatient.emergencyContactPhone}
+                onChange={(e) => setNewPatient({ ...newPatient, emergencyContactPhone: e.target.value })}
+                error={errors.emergencyContactPhone}
+                helperText={errors.emergencyContactPhone}
+              />
             </Grid>
           </Grid>
         </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpen(false)} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleSavePatient} color="primary">
+            Save
+          </Button>
+        </DialogActions>
       </Dialog>
     </Box>
   );
 };
 
 export default PatientsPage;
-

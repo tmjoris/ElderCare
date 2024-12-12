@@ -10,6 +10,7 @@ import CaregiverDashboardPage from './pages/CaregiverDashboardPage';
 import UserDashboardPage from './pages/UserDashboardPage';
 import PatientsPage from './pages/PatientsPage';
 import AppointmentsPage from './pages/AppointmentsPage';
+import PatientAppointments from './pages/PatientAppointments';
 import MedicalRecordsPage from './pages/MedicalRecordsPage';
 import ProgressReportPage from './pages/ProgressReportPage';
 import PrescriptionsAndMedicationPage from './pages/PrescriptionsAndMedicationPage';
@@ -69,6 +70,7 @@ function AppContent() {
             <>
               <Route path="/patients" element={<PatientsPage />} />
               <Route path="/appointments" element={<AppointmentsPage />} />
+              <Route path="/patient-appointments" element={<PatientAppointments/>}/>
               <Route path="/medical-records" element={<MedicalRecordsPage />} />
               <Route path="/progress-report" element={<ProgressReportPage />} />
               <Route path="/prescriptions-medication" element={<PrescriptionsAndMedicationPage />} />
