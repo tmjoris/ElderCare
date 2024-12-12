@@ -121,4 +121,16 @@ public class PatientController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
     }
+
+    @GetMapping("/patient-data")
+    public ResponseEntity<PatientResponse> getPatient(@RequestBody LoginRequest loginRequest) {
+        try {
+            PatientResponse pr = patientService.getPatientRecord(loginRequest);
+            return ResponseEntity.ok(pr);
+        } catch (AccessDeniedException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
 }
