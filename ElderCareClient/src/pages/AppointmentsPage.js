@@ -29,14 +29,31 @@ const AppointmentsPage = () => {
   });
   const [errors, setErrors] = useState([]);
 
-  const fetchAppointments = async () => {
-    try {
-      const response = await axios.get('http://localhost:8080/api/appointments');
-      setAppointments(response.data);
-    } catch (error) {
-      showError('Error fetching appointments');
-    }
-  };
+  const doctorUsername = localStorage.getItem('username');
+
+const fetchUserId = async (username) => {
+  try {
+    const response = await axios.get(`http://localhost:8080/api/users/username/${username}`);
+    return response.data.id;  
+  } catch (error) {
+    showError('Error fetching user data');
+    throw error; 
+  }
+};
+
+const fetchAppointments = async () => {
+  try {
+    const doctorId = await fetchUserId(doctorUsername);
+
+    const appointmentsUrl = `http://localhost:8080/api/appointments/doctor/${doctorId}`;
+
+    const response = await axios.get(appointmentsUrl);
+    setAppointments(response.data);  
+  } catch (error) {
+    showError('Error fetching appointments');
+  }
+};
+
 
   const validateForm = () => {
     const { doctorUsername, patientId, appointmentDate, location } = newAppointment;
@@ -52,7 +69,6 @@ const AppointmentsPage = () => {
   const handleSaveAppointment = async () => {
     if (!validateForm()) return;
   
-    const doctorUsername = localStorage.getItem('username');  // Retrieve username from localStorage
   
     const formData = new FormData();
     formData.append('doctorUsername', doctorUsername);
@@ -61,14 +77,12 @@ const AppointmentsPage = () => {
     formData.append('location', newAppointment.location);
   
     try {
-      // Send the formData to the backend
       await axios.post('http://localhost:8080/api/appointments', formData, {
         headers: {
-          'Content-Type': 'multipart/form-data',  // Tell the backend it's form-data
+          'Content-Type': 'multipart/form-data',  
         },
       });
   
-      // Optimistically update the UI
       setAppointments((prev) => [
         ...prev,
         { id: appointments.length + 1, ...newAppointment, doctorUsername },
@@ -87,7 +101,6 @@ const AppointmentsPage = () => {
     try {
       await axios.delete(`http://localhost:8080/api/appointments/${id}`);
 
-      // Removing the deleted appointment from the UI
       setAppointments((prev) => prev.filter((appt) => appt.id !== id));
       showSuccess('Appointment deleted successfully');
     } catch (error) {

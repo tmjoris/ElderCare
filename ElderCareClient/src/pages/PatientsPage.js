@@ -38,14 +38,13 @@ const PatientsPage = () => {
   const loggedInUser = localStorage.getItem('username');
   const apiUrl = 'http://localhost:8080/api/patients';
 
-  // Fetch patients when the component mounts
   useEffect(() => {
     const fetchPatients = async () => {
       try {
         const response = await axios.get(apiUrl, {
           params: { username: loggedInUser },
         });
-        setPatients(response.data); // Populate patients with the API response
+        setPatients(response.data);   
       } catch (error) {
         showError('Failed to fetch patients');
         console.error(error);
@@ -75,15 +74,13 @@ const PatientsPage = () => {
 
     try {
       if (isEditing) {
-        // Handle editing logic here if needed
         showError('Editing patients is not yet implemented with the API');
       } else {
-        // Add a new patient
         const response = await axios.post(
           `${apiUrl}?username=${loggedInUser}`,
           newPatient
         );
-        setPatients((prev) => [...prev, response.data]); // Add the new patient to the list
+        setPatients((prev) => [...prev, response.data]); 
         showSuccess('Patient added successfully');
       }
       setOpen(false);
