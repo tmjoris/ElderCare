@@ -133,4 +133,25 @@ public class PatientController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
+
+    // for staff use only
+    @GetMapping("fetch/{fname}-{lname}")
+    public ResponseEntity<PatientResponse> fetchPatient(@PathVariable String fname, @PathVariable String lname) {
+        try {
+            PatientResponse pr = patientService.getPatientRecordStaff(fname, lname);
+            return ResponseEntity.ok(pr);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
+    @GetMapping("fetch/{patientId}")
+    public ResponseEntity<PatientResponse> fetchPatientById(@PathVariable Long patientId) {
+        try {
+            PatientResponse pr = patientService.getPatientRecordStaff(patientId);
+            return ResponseEntity.ok(pr);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
 }
