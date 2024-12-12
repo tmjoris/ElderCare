@@ -32,10 +32,10 @@ public class AppointmentService {
     }
 
     private void validateDoctor(User doctor) {
-        if ("doctor".equals(doctor.getRole())) {
+        if ("doctor".equalsIgnoreCase(doctor.getRole())) {
             return;
         } else {
-            throw new IllegalArgumentException("User is not a doctor");
+            throw new IllegalArgumentException("User is not a doctor "+doctor.getUsername());
         }
     }
 

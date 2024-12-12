@@ -47,8 +47,9 @@ const Sidebar = ({ isOpen, onToggleSidebar }) => {
       { text: 'Notifications', icon: <Notifications />, path: '/notifications' },
       { text: 'Settings', icon: <Settings />, path: '/settings' },
     ],
-    user: [
+    patient: [
       { text: 'Dashboard', icon: <Home />, path: '/user-dashboard' },
+      { text: 'Appointments', icon: <Event />, path: '/patient-appointments' },
       { text: 'Notifications', icon: <Notifications />, path: '/notifications' },
       { text: 'Settings', icon: <Settings />, path: '/settings' },
     ],
