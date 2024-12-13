@@ -47,14 +47,14 @@ public class PatientController {
     @GetMapping
     public ResponseEntity<List<PatientResponse>> getAllPatients(@RequestParam String username) {
         try {
-            userService.validatePrivileges(username, "editor");
+            //userService.validatePrivileges(username, "editor");
             List<PatientResponse> patients = patientService.getAllPatients();
             return ResponseEntity.ok(patients);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
-        } catch (AccessDeniedException e) {
+        } /*catch (AccessDeniedException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
+        }*/
     }
 
     @GetMapping("/login")

@@ -19,68 +19,68 @@ import 'react-calendar/dist/Calendar.css';
 import { showError, showSuccess } from '../ToastConfig';
 
 const CaregiverDashboardPage = () => {
-  const [assignedPatients, setAssignedPatients] = useState([]);
   const [reminders, setReminders] = useState([]);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [newReminder, setNewReminder] = useState('');
+  const [reminderTime, setReminderTime] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  const presetAssignedPatients = [
-    { id: 1, name: 'John Doe', age: 67, condition: 'Diabetes' },
-    { id: 2, name: 'Jane Smith', age: 72, condition: 'Hypertension' },
-  ];
-
+  // Preset reminders
   const presetReminders = [
     { id: 1, message: 'Administer medication', date: '2024-12-01T10:00:00' },
     { id: 2, message: 'Blood pressure check', date: '2024-12-02T14:00:00' },
   ];
 
-  const fetchAssignedPatients = useCallback(() => {
-    try {
-      setAssignedPatients(presetAssignedPatients);
-      showSuccess('Assigned patients loaded successfully');
-    } catch (error) {
-      showError('Error fetching assigned patients');
-    }
-  }, []);
-
+  // Fetch reminders from localStorage or set preset ones if not available
   const fetchReminders = useCallback(() => {
     try {
-      setReminders(presetReminders);
-      showSuccess('Reminders loaded successfully');
+      const savedReminders = localStorage.getItem('reminders');
+      if (savedReminders) {
+        setReminders(JSON.parse(savedReminders));
+        showSuccess('Reminders loaded successfully');
+      } else {
+        // If no reminders are saved, set and save preset reminders to localStorage
+        setReminders(presetReminders);
+        localStorage.setItem('reminders', JSON.stringify(presetReminders));
+        showSuccess('Preset reminders loaded successfully');
+      }
     } catch (error) {
       showError('Error fetching reminders');
     }
   }, []);
 
+  // Handle date change
   const handleDateChange = (date) => {
     setSelectedDate(date);
   };
 
+  // Handle adding reminder
   const handleAddReminder = () => {
-    if (!newReminder.trim()) {
-      showError('Please provide a reminder message');
+    if (!newReminder.trim() || !reminderTime.trim()) {
+      showError('Please provide both a reminder message and time');
       return;
     }
-    try {
-      const newReminderObj = {
-        id: reminders.length + 1,
-        date: selectedDate.toISOString(),
-        message: newReminder.trim(),
-      };
-      setReminders((prev) => [...prev, newReminderObj]);
-      setNewReminder('');
-      setDialogOpen(false);
-      showSuccess('Reminder added successfully');
-    } catch (error) {
-      showError('Error adding reminder');
-    }
+
+    const newReminderObj = {
+      id: reminders.length + 1,
+      date: reminderTime,
+      message: newReminder.trim(),
+    };
+
+    const updatedReminders = [...reminders, newReminderObj];
+    setReminders(updatedReminders);
+    localStorage.setItem('reminders', JSON.stringify(updatedReminders));
+
+    setNewReminder('');
+    setReminderTime('');
+    setDialogOpen(false);
+    showSuccess('Reminder added successfully');
   };
 
+  // Effect to load reminders from localStorage on component mount
   useEffect(() => {
-    fetchAssignedPatients();
     fetchReminders();
-  }, [fetchAssignedPatients, fetchReminders]);
+  }, [fetchReminders]);
 
   return (
     <Box
@@ -95,41 +95,7 @@ const CaregiverDashboardPage = () => {
       <Typography variant="h4" gutterBottom>
         Caregiver Dashboard
       </Typography>
-      <Grid container spacing={3}>
-        {/* Assigned Patients */}
-        <Grid item xs={12} md={6}>
-          <Card
-            sx={{
-              padding: '20px',
-              boxShadow: 3,
-              borderRadius: 2,
-              transition: 'transform 0.3s, box-shadow 0.3s',
-              '&:hover': {
-                transform: 'scale(1.05)',
-                boxShadow: 5,
-              },
-            }}
-          >
-            <Typography variant="h6" gutterBottom>
-              Assigned Patients
-            </Typography>
-            {assignedPatients.length > 0 ? (
-              <List>
-                {assignedPatients.map((patient) => (
-                  <ListItem key={patient.id}>
-                    <ListItemText
-                      primary={patient.name}
-                      secondary={`Age: ${patient.age}, Condition: ${patient.condition}`}
-                    />
-                  </ListItem>
-                ))}
-              </List>
-            ) : (
-              <Typography variant="body1">No patients assigned yet.</Typography>
-            )}
-          </Card>
-        </Grid>
-
+      <Grid>
         {/* Reminders */}
         <Grid item xs={12} md={6}>
           <Card
@@ -193,6 +159,17 @@ const CaregiverDashboardPage = () => {
             value={newReminder}
             onChange={(e) => setNewReminder(e.target.value)}
             sx={{ marginBottom: '20px' }}
+          />
+          <TextField
+            label="Time to be Reminded"
+            type="datetime-local"
+            fullWidth
+            value={reminderTime}
+            onChange={(e) => setReminderTime(e.target.value)}
+            sx={{ marginBottom: '20px' }}
+            InputLabelProps={{
+              shrink: true,
+            }}
           />
           <Button variant="contained" color="primary" onClick={handleAddReminder}>
             Save Reminder
