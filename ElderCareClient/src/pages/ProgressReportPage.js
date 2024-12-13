@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import {
   Table,
   TableBody,
@@ -22,74 +23,103 @@ const ProgressReportPage = () => {
   const [open, setOpen] = useState(false);
   const [newReport, setNewReport] = useState({
     patientId: '',
-    notes: '',
+    caregiverId: '', 
     date: '',
+    summary: '', 
+    recommendations: ''
   });
   const [errors, setErrors] = useState({});
   const [isEditing, setIsEditing] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [userId, setUserId] = useState(null); 
 
   const loggedInUserRole = localStorage.getItem('mockRole');
-  const loggedInUserId = localStorage.getItem('mockId');
+  const username = localStorage.getItem('username');
 
-  // Preset mock data for progress reports
-  const mockProgressReports = [
-    { id: 1, patientId: 'P123', notes: 'Improving condition', date: '2024-11-28', caregiverId: 'C123' },
-    { id: 2, patientId: 'P124', notes: 'Stable condition', date: '2024-11-27', caregiverId: 'C124' },
-    { id: 3, patientId: 'P125', notes: 'Condition worsening', date: '2024-11-26', caregiverId: 'C123' },
-  ];
+  const fetchUserId = async (username) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:8080/api/users/username/${username}`
+      );
+      return response.data.id;
+    } catch (error) {
+      console.error("Error fetching user ID:", error);
+      throw new Error("User ID fetch failed");
+    }
+  };
 
   useEffect(() => {
-    // Filter progress reports based on role
-    let filteredReports = [];
-    if (loggedInUserRole === 'doctor') {
-      // Doctors see all reports
-      filteredReports = mockProgressReports;
-    } else if (loggedInUserRole === 'caregiver') {
-      // Caregivers see only reports for their assigned patients
-      filteredReports = mockProgressReports.filter(
-        (report) => report.caregiverId === loggedInUserId
-      );
-    } else if (loggedInUserRole === 'user') {
-      // Users see only their own reports
-      filteredReports = mockProgressReports.filter(
-        (report) => report.patientId === loggedInUserId
-      );
-    }
-    setReports(filteredReports);
-  }, [loggedInUserRole, loggedInUserId]);
+    const fetchUserAndReports = async () => {
+      try {
+        const fetchedUserId = await fetchUserId(username);
+        setUserId(fetchedUserId); 
+        let url = 'http://localhost:8080/api/progress-reports';
+        if (loggedInUserRole === 'doctor') {
+          url = 'http://localhost:8080/api/progress-reports';
+        } else if (loggedInUserRole === 'caregiver') {
+          url = `http://localhost:8080/api/progress-reports/caregiver/${fetchedUserId}`;
+        } else if (loggedInUserRole === 'user') {
+          url = `http://localhost:8080/api/progress-reports/patient/${fetchedUserId}`;
+        }
+
+        const response = await axios.get(url);
+        setReports(response.data); 
+      } catch (error) {
+        console.error('Error fetching progress reports:', error);
+        showError('Error fetching progress reports');
+      }
+    };
+
+    fetchUserAndReports();
+  }, [loggedInUserRole, username]); 
 
   const validateForm = () => {
-    const { patientId, notes, date } = newReport;
+    const { patientId, caregiverId, date, summary, recommendations } = newReport;
     const formErrors = {};
     if (!patientId) formErrors.patientId = 'Patient ID is required';
-    if (!notes) formErrors.notes = 'Progress notes are required';
+    if (!caregiverId) formErrors.caregiverId = 'Caregiver ID is required';
     if (!date) formErrors.date = 'Date is required';
+    if (!summary) formErrors.summary = 'Summary is required';
+    if (!recommendations) formErrors.recommendations = 'Recommendations are required';
+
     setErrors(formErrors);
     return Object.keys(formErrors).length === 0;
   };
 
-  const handleSaveReport = () => {
+  const handleSaveReport = async () => {
     if (!validateForm()) return;
 
     try {
+      const reportData = {
+        patientId: newReport.patientId,
+        caregiverId: newReport.caregiverId,
+        date: newReport.date,
+        summary: newReport.summary,
+        recommendations: newReport.recommendations,
+      };
+
       if (isEditing) {
-        // Update existing report
-        const updatedReports = reports.map((report) =>
-          report.id === editingId ? { ...newReport, id: editingId } : report
+        await axios.put(
+          `http://localhost:8080/api/progress-reports/${editingId}`,
+          reportData
         );
-        setReports(updatedReports);
+        setReports(
+          reports.map((report) =>
+            report.id === editingId ? { ...newReport, id: editingId } : report
+          )
+        );
         showSuccess('Progress report updated successfully');
       } else {
-        // Add new report
-        const newEntry = { ...newReport, id: Date.now(), caregiverId: loggedInUserId };
-        setReports([...reports, newEntry]);
+        await axios.post('http://localhost:8080/api/progress-reports', reportData);
+        setReports([...reports, { ...newReport, id: Date.now() }]);
         showSuccess('Progress report added successfully');
       }
+
       setOpen(false);
-      setNewReport({ patientId: '', notes: '', date: '' });
+      setNewReport({ patientId: '', caregiverId: '', date: '', summary: '', recommendations: '' });
       setIsEditing(false);
     } catch (error) {
+      console.error('Error saving progress report:', error);
       showError('Error saving progress report');
     }
   };
@@ -101,12 +131,14 @@ const ProgressReportPage = () => {
     setOpen(true);
   };
 
-  const handleDeleteReport = (id) => {
+  const handleDeleteReport = async (id) => {
     try {
+      await axios.delete(`http://localhost:8080/api/progress-reports/${id}`);
       const updatedReports = reports.filter((report) => report.id !== id);
       setReports(updatedReports);
       showSuccess('Progress report deleted successfully');
     } catch (error) {
+      console.error('Error deleting progress report:', error);
       showError('Error deleting progress report');
     }
   };
@@ -123,7 +155,7 @@ const ProgressReportPage = () => {
       <Typography variant="h4" gutterBottom>
         Progress Reports
       </Typography>
-      {loggedInUserRole === 'doctor' && (
+      {loggedInUserRole === 'doctor' || 'caregiver' && (
         <Button
           variant="contained"
           color="primary"
@@ -143,9 +175,13 @@ const ProgressReportPage = () => {
         <Table>
           <TableHead>
             <TableRow>
+              <TableCell sx={{ fontWeight: 'bold' }}>Progress Report ID</TableCell>
               <TableCell sx={{ fontWeight: 'bold' }}>Patient ID</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>Notes</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>Caregiver Id</TableCell>
               <TableCell sx={{ fontWeight: 'bold' }}>Date</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>Summary</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>Recommendations</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>Created At</TableCell>              
               {loggedInUserRole === 'doctor' && (
                 <TableCell sx={{ fontWeight: 'bold' }}>Actions</TableCell>
               )}
@@ -161,9 +197,14 @@ const ProgressReportPage = () => {
                   transition: 'background-color 0.3s ease',
                 }}
               >
+                <TableCell>{report.reportId}</TableCell>
                 <TableCell>{report.patientId}</TableCell>
-                <TableCell>{report.notes}</TableCell>
+                <TableCell>{report.caregiverId}</TableCell>
                 <TableCell>{report.date}</TableCell>
+                <TableCell>{report.summary}</TableCell>
+                <TableCell>{report.recommendations}</TableCell>
+                <TableCell>{report.createdAt}</TableCell>
+                <TableCell>{report.patientId}</TableCell>
                 {loggedInUserRole === 'doctor' && (
                   <TableCell>
                     <Button
@@ -204,26 +245,49 @@ const ProgressReportPage = () => {
             </Grid>
             <Grid item xs={12}>
               <FormInput
-                label="Notes"
-                value={newReport.notes}
-                onChange={(e) => setNewReport({ ...newReport, notes: e.target.value })}
-                error={errors.notes}
-                helperText={errors.notes}
+                label="Caregiver ID"
+                value={newReport.caregiverId}
+                onChange={(e) => setNewReport({ ...newReport, caregiverId: e.target.value })}
+                error={errors.caregiverId}
+                helperText={errors.caregiverId}
               />
             </Grid>
             <Grid item xs={12}>
               <FormInput
                 label="Date"
-                type="date"
+                type="datetime-local"
                 value={newReport.date}
                 onChange={(e) => setNewReport({ ...newReport, date: e.target.value })}
                 error={errors.date}
                 helperText={errors.date}
               />
             </Grid>
+            <Grid item xs={12}>
+              <FormInput
+                label="Summary"
+                value={newReport.summary}
+                onChange={(e) => setNewReport({ ...newReport, summary: e.target.value })}
+                error={errors.summary}
+                helperText={errors.summary}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <FormInput
+                label="Recommendations"
+                value={newReport.recommendations}
+                onChange={(e) => setNewReport({ ...newReport, recommendations: e.target.value })}
+                error={errors.recommendations}
+                helperText={errors.recommendations}
+              />
+            </Grid>
             <Grid item xs={12} sx={{ textAlign: 'center' }}>
-              <Button variant="contained" color="primary" onClick={handleSaveReport}>
-                Save
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleSaveReport}
+                sx={{ marginTop: '20px' }}
+              >
+                {isEditing ? 'Update Report' : 'Save Report'}
               </Button>
             </Grid>
           </Grid>

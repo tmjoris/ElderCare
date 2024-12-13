@@ -1,178 +1,186 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  TextField,
   Table,
   TableBody,
   TableCell,
+  TableContainer,
   TableHead,
   TableRow,
-  Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  Typography,
-  Grid,
-  Box,
   Paper,
-} from '@mui/material';
-import { showSuccess, showError } from '../ToastConfig';
-import FormInput from '../components/FormInput';
+} from "@mui/material";
 
 const MedicalRecordsPage = () => {
   const [records, setRecords] = useState([]);
   const [open, setOpen] = useState(false);
   const [newRecord, setNewRecord] = useState({
-    patientId: '',
-    doctorId: '',
-    dateOfVisit: '',
-    diagnosis: '',
-    treatmentPlan: '',
+    patientId: "",
+    doctorId: "",
+    dateOfVisit: "",
+    location: "",
+    diagnosis: "",
+    treatmentPlan: "",
+    notes: "",
   });
   const [errors, setErrors] = useState({});
   const [isEditing, setIsEditing] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const username = localStorage.getItem('username');
+  const loggedInUserRole = localStorage.getItem('mockRole');
 
-  const loggedInUserRole = localStorage.getItem('mockRole'); // 'doctor' or 'patient'
-  const loggedInUserId = localStorage.getItem('mockId'); // User's ID
-
-  // Mock data
-  const mockRecords = [
-    {
-      id: 1,
-      patientId: 'P001',
-      doctorId: 'D001',
-      dateOfVisit: '2023-12-01',
-      diagnosis: 'Flu',
-      treatmentPlan: 'Rest and hydration',
-    },
-    {
-      id: 2,
-      patientId: 'P002',
-      doctorId: 'D002',
-      dateOfVisit: '2023-12-02',
-      diagnosis: 'Cough',
-      treatmentPlan: 'Cough syrup and steam inhalation',
-    },
-  ];
-
-  const fetchRecords = async () => {
+  const fetchUserId = async (username) => {
     try {
-      // Filter mock data based on role
-      const filteredRecords =
-        loggedInUserRole === 'doctor'
-          ? mockRecords.filter((record) => record.doctorId === loggedInUserId)
-          : loggedInUserRole === 'patient'
-          ? mockRecords.filter((record) => record.patientId === loggedInUserId)
-          : mockRecords;
-
-      setRecords(filteredRecords);
-
-      // Uncomment for backend integration
-      // const response = await axios.get('http://localhost:5000/api/medical-records');
-      // setRecords(response.data);
+      const response = await axios.get(
+        `http://localhost:8080/api/users/username/${username}`
+      );
+      return response.data.id;
     } catch (error) {
-      showError('Error fetching medical records');
+      console.error("Error fetching user ID:", error);
+      throw new Error("User ID fetch failed");
     }
   };
 
+  useEffect(() => {
+    const fetchMedicalRecords = async () => {
+      try {
+        const userId = await fetchUserId(username);
+        let appointmentsUrl;
+
+        switch (loggedInUserRole) {
+          case "doctor":
+            appointmentsUrl = `http://localhost:8080/api/medical-records/doctor/${userId}`;
+            break;
+          case "patient":
+            appointmentsUrl = `http://localhost:8080/api/medical-records/patient/${userId}`;
+            break;
+          case "caregiver":
+            appointmentsUrl = `http://localhost:8080/api/medical-records`;
+            break;
+          default:
+            console.error("Invalid user role");
+            return;
+        }
+
+        const response = await axios.get(appointmentsUrl);
+        setRecords(response.data);
+      } catch (error) {
+        console.error("Error fetching medical records:", error);
+      }
+    };
+
+    fetchMedicalRecords();
+  }, [loggedInUserRole, username]);
+
   const validateForm = () => {
-    const { patientId, doctorId, dateOfVisit, diagnosis, treatmentPlan } = newRecord;
-    const formErrors = {};
-    if (!patientId) formErrors.patientId = 'Patient ID is required';
-    if (!doctorId) formErrors.doctorId = 'Doctor ID is required';
-    if (!dateOfVisit) formErrors.dateOfVisit = 'Date of visit is required';
-    if (!diagnosis) formErrors.diagnosis = 'Diagnosis is required';
-    if (!treatmentPlan) formErrors.treatmentPlan = 'Treatment plan is required';
-    setErrors(formErrors);
-    return Object.keys(formErrors).length === 0;
+    const newErrors = {};
+    if (!newRecord.patientId) newErrors.patientId = "Patient ID is required";
+    if (!newRecord.doctorId) newErrors.doctorId = "Doctor ID is required";
+    if (!newRecord.dateOfVisit) newErrors.dateOfVisit = "Date of visit is required";
+    if (!newRecord.location) newErrors.location = "Location is required";
+    if (!newRecord.diagnosis) newErrors.diagnosis = "Diagnosis is required";
+    if (!newRecord.treatmentPlan)
+      newErrors.treatmentPlan = "Treatment plan is required";
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSaveRecord = async () => {
     if (!validateForm()) return;
 
     try {
+      let response;
       if (isEditing) {
-        setRecords((prev) =>
-          prev.map((record) => (record.id === editingId ? { ...newRecord, id: editingId } : record))
+        response = await axios.put(
+          `http://localhost:8080/api/medical-records/${editingId}`,
+          newRecord
         );
-        showSuccess('Medical record updated successfully');
+        setRecords((prev) =>
+          prev.map((record) =>
+            record.id === editingId ? response.data : record
+          )
+        );
       } else {
-        setRecords((prev) => [...prev, { ...newRecord, id: Date.now() }]);
-        showSuccess('Medical record added successfully');
+        response = await axios.post(
+          `http://localhost:8080/api/medical-records`,
+          newRecord
+        );
+        setRecords((prev) => [...prev, response.data]);
       }
       setOpen(false);
-      setNewRecord({
-        patientId: '',
-        doctorId: '',
-        dateOfVisit: '',
-        diagnosis: '',
-        treatmentPlan: '',
-      });
-      setIsEditing(false);
+      resetForm();
     } catch (error) {
-      showError('Error saving medical record');
+      console.error("Error saving medical record:", error);
     }
   };
 
+  const formatDate = (isoDate) => {
+    const date = new Date(isoDate);
+    return new Intl.DateTimeFormat('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true,
+    }).format(date);
+  };
+
   const handleEditRecord = (record) => {
-    setNewRecord(record);
-    setEditingId(record.id);
     setIsEditing(true);
+    setEditingId(record.id);
+    setNewRecord(record);
     setOpen(true);
   };
 
   const handleDeleteRecord = async (id) => {
     try {
+      await axios.delete(`http://localhost:8080/api/medical-records/${id}`);
       setRecords((prev) => prev.filter((record) => record.id !== id));
-      showSuccess('Medical record deleted successfully');
     } catch (error) {
-      showError('Error deleting medical record');
+      console.error("Error deleting medical record:", error);
     }
   };
 
-  useEffect(() => {
-    fetchRecords();
-  }, []);
+  const resetForm = () => {
+    setNewRecord({
+      patientId: "",
+      doctorId: "",
+      dateOfVisit: "",
+      location: "",
+      diagnosis: "",
+      treatmentPlan: "",
+      notes: "",
+    });
+    setErrors({});
+    setIsEditing(false);
+  };
 
   return (
-    <Box
-      sx={{
-        padding: '20px',
-        backgroundColor: (theme) => theme.palette.background.default,
-        borderRadius: '12px',
-        boxShadow: 3,
-      }}
-    >
-      <Typography variant="h4" gutterBottom>
-        Medical Records
-      </Typography>
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={() => {
-          setIsEditing(false);
-          setNewRecord({
-            patientId: '',
-            doctorId: '',
-            dateOfVisit: '',
-            diagnosis: '',
-            treatmentPlan: '',
-          });
-          setOpen(true);
-        }}
-        sx={{ marginBottom: '20px' }}
-      >
-        Add Medical Record
+    <div>
+      <h1>Medical Records</h1>
+      <Button variant="contained" color="primary" onClick={() => setOpen(true)}>
+        Add New Record
       </Button>
-      <Paper sx={{ padding: '20px', boxShadow: 3, borderRadius: '12px' }}>
+  
+      <TableContainer component={Paper} style={{ marginTop: "20px" }}>
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell sx={{ fontWeight: 'bold' }}>Patient ID</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>Doctor ID</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>Date of Visit</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>Diagnosis</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>Treatment Plan</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>Actions</TableCell>
+              <TableCell>Patient ID</TableCell>
+              <TableCell>Doctor ID</TableCell>
+              <TableCell>Date of Visit</TableCell>
+              <TableCell>Location</TableCell>
+              <TableCell>Diagnosis</TableCell>
+              <TableCell>Treatment Plan</TableCell>
+              <TableCell>Notes</TableCell>
+              <TableCell>Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -180,22 +188,24 @@ const MedicalRecordsPage = () => {
               <TableRow key={record.id}>
                 <TableCell>{record.patientId}</TableCell>
                 <TableCell>{record.doctorId}</TableCell>
-                <TableCell>{record.dateOfVisit}</TableCell>
+                <TableCell>{formatDate(record.dateOfVisit)}</TableCell>
+                <TableCell>{record.location}</TableCell>
                 <TableCell>{record.diagnosis}</TableCell>
                 <TableCell>{record.treatmentPlan}</TableCell>
+                <TableCell>{record.notes}</TableCell>
                 <TableCell>
                   <Button
-                    variant="outlined"
-                    color="secondary"
+                    variant="contained"
+                    color="primary"
                     onClick={() => handleEditRecord(record)}
-                    sx={{ marginRight: '10px' }}
                   >
                     Edit
                   </Button>
                   <Button
                     variant="contained"
-                    color="error"
+                    color="secondary"
                     onClick={() => handleDeleteRecord(record.id)}
+                    style={{ marginLeft: "10px" }}
                   >
                     Delete
                   </Button>
@@ -204,68 +214,99 @@ const MedicalRecordsPage = () => {
             ))}
           </TableBody>
         </Table>
-      </Paper>
-
-      <Dialog open={open} onClose={() => setOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>{isEditing ? 'Edit Medical Record' : 'Add Medical Record'}</DialogTitle>
+      </TableContainer>
+  
+      <Dialog open={open} onClose={() => setOpen(false)}>
+        <DialogTitle>{isEditing ? "Edit Record" : "Add New Record"}</DialogTitle>
         <DialogContent>
-          <Grid container spacing={2}>
-            <Grid item xs={12}>
-              <FormInput
-                label="Patient ID"
-                value={newRecord.patientId}
-                onChange={(e) => setNewRecord({ ...newRecord, patientId: e.target.value })}
-                error={errors.patientId}
-                helperText={errors.patientId}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <FormInput
-                label="Doctor ID"
-                value={newRecord.doctorId}
-                onChange={(e) => setNewRecord({ ...newRecord, doctorId: e.target.value })}
-                error={errors.doctorId}
-                helperText={errors.doctorId}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <FormInput
-                label="Date of Visit"
-                type="date"
-                value={newRecord.dateOfVisit}
-                onChange={(e) => setNewRecord({ ...newRecord, dateOfVisit: e.target.value })}
-                error={errors.dateOfVisit}
-                helperText={errors.dateOfVisit}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <FormInput
-                label="Diagnosis"
-                value={newRecord.diagnosis}
-                onChange={(e) => setNewRecord({ ...newRecord, diagnosis: e.target.value })}
-                error={errors.diagnosis}
-                helperText={errors.diagnosis}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <FormInput
-                label="Treatment Plan"
-                value={newRecord.treatmentPlan}
-                onChange={(e) => setNewRecord({ ...newRecord, treatmentPlan: e.target.value })}
-                error={errors.treatmentPlan}
-                helperText={errors.treatmentPlan}
-              />
-            </Grid>
-            <Grid item xs={12} sx={{ textAlign: 'center' }}>
-              <Button variant="contained" color="primary" onClick={handleSaveRecord}>
-                Save
-              </Button>
-            </Grid>
-          </Grid>
+          <TextField
+            label="Patient ID"
+            fullWidth
+            margin="normal"
+            value={newRecord.patientId}
+            onChange={(e) =>
+              setNewRecord({ ...newRecord, patientId: e.target.value })
+            }
+            error={!!errors.patientId}
+            helperText={errors.patientId}
+          />
+          <TextField
+            label="Doctor ID"
+            fullWidth
+            margin="normal"
+            value={newRecord.doctorId}
+            onChange={(e) =>
+              setNewRecord({ ...newRecord, doctorId: e.target.value })
+            }
+            error={!!errors.doctorId}
+            helperText={errors.doctorId}
+          />
+          <TextField
+            label="Date of Visit"
+            type="datetime-local"
+            fullWidth
+            margin="normal"
+            InputLabelProps={{ shrink: true }}
+            value={newRecord.dateOfVisit}
+            onChange={(e) =>
+              setNewRecord({ ...newRecord, dateOfVisit: e.target.value })
+            }
+            error={!!errors.dateOfVisit}
+            helperText={errors.dateOfVisit}
+          />
+          <TextField
+            label="Location"
+            fullWidth
+            margin="normal"
+            value={newRecord.location}
+            onChange={(e) =>
+              setNewRecord({ ...newRecord, location: e.target.value })
+            }
+            error={!!errors.location}
+            helperText={errors.location}
+          />
+          <TextField
+            label="Diagnosis"
+            fullWidth
+            margin="normal"
+            value={newRecord.diagnosis}
+            onChange={(e) =>
+              setNewRecord({ ...newRecord, diagnosis: e.target.value })
+            }
+            error={!!errors.diagnosis}
+            helperText={errors.diagnosis}
+          />
+          <TextField
+            label="Treatment Plan"
+            fullWidth
+            margin="normal"
+            value={newRecord.treatmentPlan}
+            onChange={(e) =>
+              setNewRecord({ ...newRecord, treatmentPlan: e.target.value })
+            }
+            error={!!errors.treatmentPlan}
+            helperText={errors.treatmentPlan}
+          />
+          <TextField
+            label="Notes"
+            fullWidth
+            margin="normal"
+            value={newRecord.notes}
+            onChange={(e) =>
+              setNewRecord({ ...newRecord, notes: e.target.value })
+            }
+          />
         </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpen(false)} color="secondary">
+            Cancel
+          </Button>
+          <Button onClick={handleSaveRecord} color="primary">
+            Save
+          </Button>
+        </DialogActions>
       </Dialog>
-    </Box>
+    </div>
   );
 };
-
-export default MedicalRecordsPage;
+  export default MedicalRecordsPage;

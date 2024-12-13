@@ -27,9 +27,10 @@ const AppointmentsPage = () => {
     appointmentDate: '',
     location: '',
   });
-  const [errors, setErrors] = useState([]);
 
-  const doctorUsername = localStorage.getItem('username');
+const [errors, setErrors] = useState([]);
+
+const doctorUsername = localStorage.getItem('username');
 
 const fetchUserId = async (username) => {
   try {
@@ -54,6 +55,17 @@ const fetchAppointments = async () => {
   }
 };
 
+const formatDate = (isoDate) => {
+  const date = new Date(isoDate);
+  return new Intl.DateTimeFormat('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true,
+  }).format(date);
+};
 
   const validateForm = () => {
     const { doctorUsername, patientId, appointmentDate, location } = newAppointment;
@@ -154,7 +166,7 @@ const fetchAppointments = async () => {
               <TableRow key={appointment.id}>
                 <TableCell>{appointment.doctorUsername}</TableCell>
                 <TableCell>{appointment.patientId}</TableCell>
-                <TableCell>{appointment.appointmentDate}</TableCell>
+                <TableCell>{formatDate(appointment.appointmentDate)}</TableCell>
                 <TableCell>{appointment.location}</TableCell>
                 <TableCell>
                   <Button
