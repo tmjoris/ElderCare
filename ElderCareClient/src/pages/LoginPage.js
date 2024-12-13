@@ -67,7 +67,7 @@ const LoginPage = () => {
         }
       }
     } catch (err) {
-      showError(err.response?.data || 'Login failed'); // Show error message from API response
+      showError('Login failed'); // Show error message from API response
     }
   };
 

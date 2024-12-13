@@ -13,55 +13,55 @@ import {
 import Calendar from 'react-calendar';
 import { useNavigate } from 'react-router-dom';
 import 'react-calendar/dist/Calendar.css';
+import axios from 'axios';
 import { showError, showSuccess } from '../ToastConfig';
 
 const DashboardPage = () => {
   const navigate = useNavigate();
-  const [metrics, setMetrics] = useState({
-    patientsCount: 0,
-    appointmentsCount: 0,
-    medicalRecordsCount: 0,
-  });
   const [upcomingAppointments, setUpcomingAppointments] = useState([]);
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const doctorUsername = localStorage.getItem('username');
 
-  const presetMetrics = {
-    patientsCount: 3,
-    appointmentsCount: 3,
-    medicalRecordsCount: 3,
+  const fetchUserId = async (username) => {
+    try {
+      const response = await axios.get(`http://localhost:8080/api/users/username/${username}`);
+      return response.data.id;
+    } catch (error) {
+      showError('Error fetching user data');
+      throw error;
+    }
   };
 
-  const presetAppointments = [
-    { id: 1, patientName: 'John Doe', doctorName: 'Dr. John', appointmentDate: '2024-12-01T10:00:00' },
-    { id: 2, patientName: 'Jane Smith', doctorName: 'Dr. John', appointmentDate: '2024-12-02T14:00:00' },
-    { id: 3, patientName: 'Alice Johnson', doctorName: 'Dr. John', appointmentDate: '2024-12-03T11:00:00' },
-  ];
-
-  const fetchMetrics = useCallback(() => {
+  const fetchAppointments = async () => {
     try {
-      setMetrics(presetMetrics);
-      showSuccess('Metrics loaded successfully');
+      const doctorId = await fetchUserId(doctorUsername);
+      const appointmentsUrl = `http://localhost:8080/api/appointments/doctor/${doctorId}`;
+      const response = await axios.get(appointmentsUrl);
+      setUpcomingAppointments(response.data);
     } catch (error) {
-      showError('Error fetching dashboard metrics');
+      showError('Error fetching appointments');
     }
-  }, []);
-
-  const fetchUpcomingAppointments = useCallback(() => {
-    try {
-      setUpcomingAppointments(presetAppointments);
-    } catch (error) {
-      showError('Error fetching upcoming appointments');
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchMetrics();
-    fetchUpcomingAppointments();
-  }, [fetchMetrics, fetchUpcomingAppointments]);
+  };
 
   const handleDateChange = (date) => {
     setSelectedDate(date);
   };
+
+  const formatDate = (isoDate) => {
+    const date = new Date(isoDate);
+    return new Intl.DateTimeFormat('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true,
+    }).format(date);
+  };
+
+  useEffect(() => {
+    fetchAppointments();
+  }, []);
 
   return (
     <Box
@@ -93,7 +93,6 @@ const DashboardPage = () => {
             }}
           >
             <Typography variant="h6">Total Patients</Typography>
-            <Typography variant="h3">{metrics.patientsCount || 'N/A'}</Typography>
             <Button
               variant="contained"
               color="primary"
@@ -120,7 +119,6 @@ const DashboardPage = () => {
             }}
           >
             <Typography variant="h6">Appointments</Typography>
-            <Typography variant="h3">{metrics.appointmentsCount || 'N/A'}</Typography>
             <Button
               variant="contained"
               color="primary"
@@ -147,7 +145,6 @@ const DashboardPage = () => {
             }}
           >
             <Typography variant="h6">Medical Records</Typography>
-            <Typography variant="h3">{metrics.medicalRecordsCount || 'N/A'}</Typography>
             <Button
               variant="contained"
               color="primary"
@@ -177,8 +174,8 @@ const DashboardPage = () => {
               {upcomingAppointments.map((appointment) => (
                 <ListItem key={appointment.id}>
                   <ListItemText
-                    primary={`${appointment.patientName} with ${appointment.doctorName}`}
-                    secondary={`Date: ${new Date(appointment.appointmentDate).toLocaleString()}`}
+                    primary={`Appointment with Patient ID: ${appointment.patientId}`}
+                    secondary={`Date: ${formatDate(appointment.appointmentDate)} | Location: ${appointment.location}`}
                   />
                 </ListItem>
               ))}
