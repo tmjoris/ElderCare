@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { showSuccess, showError } from '../ToastConfig';
 import FormInput from '../components/FormInput';
 import axios from 'axios';
+import apiUrl from '../config';
 
 const LoginPage = () => {
   const [username, setUsername] = useState('');
@@ -35,7 +36,7 @@ const LoginPage = () => {
     if (!validateForm()) return;
 
     try {
-      const response = await axios.post('http://localhost:8080/api/users/login', {
+      const response = await axios.post(`${apiUrl}/api/users/login`, {
         username,
         password,
       });

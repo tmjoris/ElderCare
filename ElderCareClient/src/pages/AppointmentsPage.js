@@ -17,6 +17,7 @@ import {
 import { showSuccess, showError } from '../ToastConfig';
 import FormInput from '../components/FormInput';
 import axios from 'axios';
+import apiUrl from '../config';
 
 const AppointmentsPage = () => {
   const [appointments, setAppointments] = useState([]);
@@ -34,7 +35,7 @@ const doctorUsername = localStorage.getItem('username');
 
 const fetchUserId = async (username) => {
   try {
-    const response = await axios.get(`http://localhost:8080/api/users/username/${username}`);
+    const response = await axios.get(`${apiUrl}/api/users/username/${username}`);
     return response.data.id;  
   } catch (error) {
     showError('Error fetching user data');
@@ -46,7 +47,7 @@ const fetchAppointments = async () => {
   try {
     const doctorId = await fetchUserId(doctorUsername);
 
-    const appointmentsUrl = `http://localhost:8080/api/appointments/doctor/${doctorId}`;
+    const appointmentsUrl = `${apiUrl}/api/appointments/doctor/${doctorId}`;
 
     const response = await axios.get(appointmentsUrl);
     setAppointments(response.data);  
@@ -89,7 +90,7 @@ const formatDate = (isoDate) => {
     formData.append('location', newAppointment.location);
   
     try {
-      await axios.post('http://localhost:8080/api/appointments', formData, {
+      await axios.post('${apiUrl}/api/appointments', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',  
         },
@@ -111,7 +112,7 @@ const formatDate = (isoDate) => {
 
   const handleDeleteAppointment = async (id) => {
     try {
-      await axios.delete(`http://localhost:8080/api/appointments/${id}`);
+      await axios.delete(`${apiUrl}/api/appointments/${id}`);
 
       setAppointments((prev) => prev.filter((appt) => appt.id !== id));
       showSuccess('Appointment deleted successfully');

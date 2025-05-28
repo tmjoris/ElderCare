@@ -18,6 +18,7 @@ import {
 } from '@mui/material';
 import { showSuccess, showError } from '../ToastConfig';
 import FormInput from '../components/FormInput';
+import apiUrl from '../config';
 
 const PatientsPage = () => {
   const [patients, setPatients] = useState([]);
@@ -36,12 +37,12 @@ const PatientsPage = () => {
   const [isEditing, setIsEditing] = useState(false);
   const loggedInUserRole = localStorage.getItem('mockRole');
   const loggedInUser = localStorage.getItem('username');
-  const apiUrl = 'http://localhost:8080/api/patients';
+  const apiURL = `${apiUrl}/api/patients`;
 
   useEffect(() => {
     const fetchPatients = async () => {
       try {
-        const response = await axios.get(apiUrl, {
+        const response = await axios.get(apiURl, {
           params: { username: loggedInUser },
         });
         setPatients(response.data);   
@@ -77,7 +78,7 @@ const PatientsPage = () => {
         showError('Editing patients is not yet implemented with the API');
       } else {
         const response = await axios.post(
-          `${apiUrl}?username=${loggedInUser}`,
+          `${apiURL}?username=${loggedInUser}`,
           newPatient
         );
         setPatients((prev) => [...prev, response.data]); 

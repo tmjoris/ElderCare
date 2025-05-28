@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, Typography, TextField, Button, Box } from '@mui/material';
 import axios from 'axios';
 import { showSuccess, showError } from '../ToastConfig';
+import apiUrl from '../config';
 
 const ProfilePage = () => {
   const [profile, setProfile] = useState({
@@ -21,7 +22,7 @@ const ProfilePage = () => {
   const fetchProfile = async () => {
     try {
       const username = localStorage.getItem('username'); // Replace with actual logic to get the logged-in user's username
-      const response = await axios.get(`http://localhost:8080/api/users/username/${username}`);
+      const response = await axios.get(`${apiUrl}/api/users/username/${username}`);
       const userData = response.data;
 
       setProfile({
@@ -66,7 +67,7 @@ const ProfilePage = () => {
         createdAt: profile.createdAt,
       };
 
-      await axios.put(`http://localhost:8080/api/users/username/${profile.username}`, updatedProfile);
+      await axios.put(`${apiUrl}/api/users/username/${profile.username}`, updatedProfile);
       showSuccess('Profile updated successfully');
     } catch (error) {
       console.error('Error updating profile:', error);

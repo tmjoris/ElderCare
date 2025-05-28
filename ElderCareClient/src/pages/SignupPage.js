@@ -11,11 +11,9 @@ import {
   Box,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-//import { registerUser } from '../services/auth';
 import { showSuccess, showError } from '../ToastConfig';
 import FormInput from '../components/FormInput';
-
-//const useMockAuthentication = true;
+import apiUrl from '../config';
 
 const SignupPage = () => {
   const [formData, setFormData] = useState({
@@ -56,7 +54,7 @@ const SignupPage = () => {
     if (!validateForm()) return;
 
     try {
-      const response = await fetch('http://localhost:8080/api/users/register', {
+      const response = await fetch(`${apiUrl}/api/users/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),

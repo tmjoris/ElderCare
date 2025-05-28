@@ -17,6 +17,7 @@ import {
 } from '@mui/material';
 import { showSuccess, showError } from '../ToastConfig';
 import FormInput from '../components/FormInput';
+import apiUrl from '../config';
 
 const ProgressReportPage = () => {
   const [reports, setReports] = useState([]);
@@ -39,7 +40,7 @@ const ProgressReportPage = () => {
   const fetchUserId = async (username) => {
     try {
       const response = await axios.get(
-        `http://localhost:8080/api/users/username/${username}`
+        `${apiUrl}/api/users/username/${username}`
       );
       return response.data.id;
     } catch (error) {
@@ -53,13 +54,13 @@ const ProgressReportPage = () => {
       try {
         const fetchedUserId = await fetchUserId(username);
         setUserId(fetchedUserId); 
-        let url = 'http://localhost:8080/api/progress-reports';
+        let url = `${apiUrl}/api/progress-reports`;
         if (loggedInUserRole === 'doctor') {
-          url = 'http://localhost:8080/api/progress-reports';
+          url = `${apiUrl}/api/progress-reports`;
         } else if (loggedInUserRole === 'caregiver') {
-          url = `http://localhost:8080/api/progress-reports/caregiver/${fetchedUserId}`;
+          url = `${apiUrl}/api/progress-reports/caregiver/${fetchedUserId}`;
         } else if (loggedInUserRole === 'user') {
-          url = `http://localhost:8080/api/progress-reports/patient/${fetchedUserId}`;
+          url = `${apiUrl}/api/progress-reports/patient/${fetchedUserId}`;
         }
 
         const response = await axios.get(url);
@@ -100,7 +101,7 @@ const ProgressReportPage = () => {
 
       if (isEditing) {
         await axios.put(
-          `http://localhost:8080/api/progress-reports/${editingId}`,
+          `${apiUrl}/api/progress-reports/${editingId}`,
           reportData
         );
         setReports(
@@ -110,7 +111,7 @@ const ProgressReportPage = () => {
         );
         showSuccess('Progress report updated successfully');
       } else {
-        await axios.post('http://localhost:8080/api/progress-reports', reportData);
+        await axios.post(`${apiUrl}/api/progress-reports`, reportData);
         setReports([...reports, { ...newReport, id: Date.now() }]);
         showSuccess('Progress report added successfully');
       }
@@ -133,7 +134,7 @@ const ProgressReportPage = () => {
 
   const handleDeleteReport = async (id) => {
     try {
-      await axios.delete(`http://localhost:8080/api/progress-reports/${id}`);
+      await axios.delete(`${apiUrl}/api/progress-reports/${id}`);
       const updatedReports = reports.filter((report) => report.id !== id);
       setReports(updatedReports);
       showSuccess('Progress report deleted successfully');

@@ -15,6 +15,7 @@ import {
   TableRow,
   Paper,
 } from "@mui/material";
+import apiUrl from "../config";
 
 const MedicalRecordsPage = () => {
   const [records, setRecords] = useState([]);
@@ -37,7 +38,7 @@ const MedicalRecordsPage = () => {
   const fetchUserId = async (username) => {
     try {
       const response = await axios.get(
-        `http://localhost:8080/api/users/username/${username}`
+        `${apiUrl}/api/users/username/${username}`
       );
       return response.data.id;
     } catch (error) {
@@ -54,13 +55,13 @@ const MedicalRecordsPage = () => {
 
         switch (loggedInUserRole) {
           case "doctor":
-            appointmentsUrl = `http://localhost:8080/api/medical-records/doctor/${userId}`;
+            appointmentsUrl = `${apiUrl}/api/medical-records/doctor/${userId}`;
             break;
           case "patient":
-            appointmentsUrl = `http://localhost:8080/api/medical-records/patient/${userId}`;
+            appointmentsUrl = `${apiUrl}/api/medical-records/patient/${userId}`;
             break;
           case "caregiver":
-            appointmentsUrl = `http://localhost:8080/api/medical-records`;
+            appointmentsUrl = `${apiUrl}/api/medical-records`;
             break;
           default:
             console.error("Invalid user role");
@@ -98,7 +99,7 @@ const MedicalRecordsPage = () => {
       let response;
       if (isEditing) {
         response = await axios.put(
-          `http://localhost:8080/api/medical-records/${editingId}`,
+          `${apiUrl}/api/medical-records/${editingId}`,
           newRecord
         );
         setRecords((prev) =>
@@ -108,7 +109,7 @@ const MedicalRecordsPage = () => {
         );
       } else {
         response = await axios.post(
-          `http://localhost:8080/api/medical-records`,
+          `${apiUrl}/api/medical-records`,
           newRecord
         );
         setRecords((prev) => [...prev, response.data]);
@@ -141,7 +142,7 @@ const MedicalRecordsPage = () => {
 
   const handleDeleteRecord = async (id) => {
     try {
-      await axios.delete(`http://localhost:8080/api/medical-records/${id}`);
+      await axios.delete(`${apiUrl}/api/medical-records/${id}`);
       setRecords((prev) => prev.filter((record) => record.id !== id));
     } catch (error) {
       console.error("Error deleting medical record:", error);

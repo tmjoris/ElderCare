@@ -15,6 +15,7 @@ import { useNavigate } from 'react-router-dom';
 import 'react-calendar/dist/Calendar.css';
 import axios from 'axios';
 import { showError, showSuccess } from '../ToastConfig';
+import apiUrl from '../config';
 
 const DashboardPage = () => {
   const navigate = useNavigate();
@@ -24,7 +25,7 @@ const DashboardPage = () => {
 
   const fetchUserId = async (username) => {
     try {
-      const response = await axios.get(`http://localhost:8080/api/users/username/${username}`);
+      const response = await axios.get(`${apiUrl}/api/users/username/${username}`);
       return response.data.id;
     } catch (error) {
       showError('Error fetching user data');
@@ -35,7 +36,7 @@ const DashboardPage = () => {
   const fetchAppointments = async () => {
     try {
       const doctorId = await fetchUserId(doctorUsername);
-      const appointmentsUrl = `http://localhost:8080/api/appointments/doctor/${doctorId}`;
+      const appointmentsUrl = `${apiUrl}/api/appointments/doctor/${doctorId}`;
       const response = await axios.get(appointmentsUrl);
       setUpcomingAppointments(response.data);
     } catch (error) {
