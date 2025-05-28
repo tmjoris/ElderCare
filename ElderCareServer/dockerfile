@@ -1,0 +1,6 @@
+FROM eclipse-temurin:21
+ARG JAR_FILE=build/libs/*.jar
+COPY src src
+COPY ${JAR_FILE} app.jar
+COPY src/main/resources/databases/debut.db app/debut.db
+ENTRYPOINT ["java", "-jar", "app.jar"]
