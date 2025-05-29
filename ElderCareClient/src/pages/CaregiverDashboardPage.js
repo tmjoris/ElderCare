@@ -17,6 +17,7 @@ import {
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import { showError, showSuccess } from '../ToastConfig';
+import { useMemo } from 'react';
 
 const CaregiverDashboardPage = () => {
   const [reminders, setReminders] = useState([]);
@@ -26,10 +27,10 @@ const CaregiverDashboardPage = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
 
   // Preset reminders
-  const presetReminders = [
+  const presetReminders = useMemo(()=>[
     { id: 1, message: 'Administer medication', date: '2024-12-01T10:00:00' },
     { id: 2, message: 'Blood pressure check', date: '2024-12-02T14:00:00' },
-  ];
+  ], []);
 
   // Fetch reminders from localStorage or set preset ones if not available
   const fetchReminders = useCallback(() => {
@@ -47,7 +48,7 @@ const CaregiverDashboardPage = () => {
     } catch (error) {
       showError('Error fetching reminders');
     }
-  }, []);
+  }, [presetReminders]);
 
   // Handle date change
   const handleDateChange = (date) => {
