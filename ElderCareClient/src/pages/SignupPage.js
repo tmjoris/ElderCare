@@ -83,21 +83,27 @@ const SignupPage = () => {
   };
 
   return (
-    <Container
-      maxWidth="sm"
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: '100vh',
-        backgroundColor: (theme) => theme.palette.background.default,
-      }}
+    <Box
+    sx={{
+      height:'100vh',
+      backgroundImage:'url(/homecare.jpg)',
+      backgroundPosition:'center',
+      backgroundRepeat:'no-repeat',
+      backgroundSize: 'cover',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      margin: 7
+    }}
     >
+
+   
       <Card
         sx={{
           padding: '30px',
           boxShadow: 3,
           borderRadius: '12px',
+          width: '30%',
           backgroundColor: (theme) => theme.palette.background.paper,
           transition: 'transform 0.3s, box-shadow 0.3s',
           '&:hover': {
@@ -220,7 +226,7 @@ const SignupPage = () => {
           </a>
         </Typography>
       </Card>
-    </Container>
+    </Box>
   );
 };
 
