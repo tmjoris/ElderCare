@@ -33,7 +33,7 @@ const DashboardPage = () => {
     }
   };
 
-  const fetchAppointments = async () => {
+  const fetchAppointments = useCallback(async () => {
     try {
       const doctorId = await fetchUserId(doctorUsername);
       const appointmentsUrl = `${apiUrl}/api/appointments/doctor/${doctorId}`;
@@ -42,7 +42,7 @@ const DashboardPage = () => {
     } catch (error) {
       showError('Error fetching appointments');
     }
-  };
+  }, [doctorUsername]);
 
   const handleDateChange = (date) => {
     setSelectedDate(date);
@@ -62,7 +62,7 @@ const DashboardPage = () => {
 
   useEffect(() => {
     fetchAppointments();
-  }, []);
+  }, [fetchAppointments]);
 
   return (
     <Box
