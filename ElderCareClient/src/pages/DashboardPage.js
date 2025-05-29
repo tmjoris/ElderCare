@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Grid,
   Card,
@@ -14,7 +14,7 @@ import Calendar from 'react-calendar';
 import { useNavigate } from 'react-router-dom';
 import 'react-calendar/dist/Calendar.css';
 import axios from 'axios';
-import { showError, showSuccess } from '../ToastConfig';
+import { showError } from '../ToastConfig';
 import apiUrl from '../config';
 
 const DashboardPage = () => {
