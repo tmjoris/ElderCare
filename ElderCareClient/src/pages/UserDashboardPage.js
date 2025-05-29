@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Grid, Card, Typography, Box, Paper } from '@mui/material';
+import { Grid, Card, Typography, Box } from '@mui/material';
 import { showError } from '../ToastConfig';
 
 const UserDashboardPage = () => {
