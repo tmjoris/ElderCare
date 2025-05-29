@@ -39,27 +39,8 @@ function AppContent() {
   }
   }, [location, navigate]);
 
-  return (
-    <>
-      <ToastNotification />
-      {!hideSidebarAndNavbar && isAuthenticated && (
-        <>
-          <Navbar isSidebarOpen={sidebarOpen} />
-          <Sidebar isOpen={sidebarOpen} onToggleSidebar={setSidebarOpen} />
-        </>
-      )}
-      <div
-        style={{
-          marginTop: '64px',
-          marginLeft: isAuthenticated && !hideSidebarAndNavbar && sidebarOpen ? '240px' : '60px',
-          padding: '20px',
-          transition: 'margin-left 0.3s ease',
-          minHeight: '100vh',
-          backgroundColor: theme.palette.background.default,
-          overflowX: 'hidden',
-        }}
-      >
-        <Routes>
+  const appRoutes = (
+    <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
           <Route
@@ -89,7 +70,34 @@ function AppContent() {
             </>
           )}
         </Routes>
+  );
+
+  return (
+    <>
+      <ToastNotification />
+      {!hideSidebarAndNavbar && isAuthenticated && (
+        <>
+          <Navbar isSidebarOpen={sidebarOpen} />
+          <Sidebar isOpen={sidebarOpen} onToggleSidebar={setSidebarOpen} />
+        </>
+      )}
+      {isAuthenticated && !hideSidebarAndNavbar ?(
+      <div
+        style={{
+          marginTop: '64px',
+          marginLeft: sidebarOpen ? '240px' : '60px',
+          padding: '20px',
+          transition: 'margin-left 0.3s ease',
+          minHeight: '100vh',
+          backgroundColor: theme.palette.background.default,
+          overflowX: 'hidden',
+        }}
+      >
+        {appRoutes}
       </div>
+      ) : (
+        appRoutes
+      )}
     </>
   );
 }

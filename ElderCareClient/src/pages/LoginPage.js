@@ -73,14 +73,25 @@ const LoginPage = () => {
   };
 
   return (
+    <Box
+    sx={{
+      height:'100vh',
+      backgroundImage:'url(/homecare.jpg)',
+      backgroundPosition:'center',
+      backgroundRepeat:'no-repeat',
+      backgroundSize: 'cover',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      margin: 5
+    }}
+    >
     <Container
       maxWidth="sm"
       sx={{
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'center',
-        height: '100vh',
-        backgroundColor: 'background.default',
+        justifyContent: 'center'
       }}
     >
       <Card
@@ -141,6 +152,7 @@ const LoginPage = () => {
         </Typography>
       </Card>
     </Container>
+    </Box>
   );
 };
 
