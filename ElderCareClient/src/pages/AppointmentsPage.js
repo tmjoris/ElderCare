@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import {
   Table,
   TableBody,
@@ -43,7 +43,7 @@ const fetchUserId = async (username) => {
   }
 };
 
-const fetchAppointments = async () => {
+const fetchAppointments = useCallback(async () => {
   try {
     const doctorId = await fetchUserId(doctorUsername);
 
@@ -54,7 +54,7 @@ const fetchAppointments = async () => {
   } catch (error) {
     showError('Error fetching appointments');
   }
-};
+}, [doctorUsername]);
 
 const formatDate = (isoDate) => {
   const date = new Date(isoDate);
@@ -123,7 +123,7 @@ const formatDate = (isoDate) => {
 
   useEffect(() => {
     fetchAppointments();
-  }, []);
+  }, [fetchAppointments]);
 
   return (
     <Box
