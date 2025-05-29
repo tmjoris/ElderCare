@@ -42,7 +42,7 @@ const PatientsPage = () => {
   useEffect(() => {
     const fetchPatients = async () => {
       try {
-        const response = await axios.get(apiURl, {
+        const response = await axios.get(apiURL, {
           params: { username: loggedInUser },
         });
         setPatients(response.data);   
