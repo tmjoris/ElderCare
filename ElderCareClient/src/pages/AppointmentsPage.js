@@ -90,7 +90,7 @@ const formatDate = (isoDate) => {
     formData.append('location', newAppointment.location);
   
     try {
-      await axios.post('${apiUrl}/api/appointments', formData, {
+      await axios.post(`${apiUrl}/api/appointments`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',  
         },
