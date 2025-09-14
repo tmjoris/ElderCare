@@ -4,7 +4,7 @@ import { ThemeProvider } from '@mui/material/styles';
 import theme from './styles/theme';
 import './styles/global.css';
 import LoginPage from './pages/LoginPage';
-import SignupPage from './pages/SignupPage';
+import SignupPage from './pages/signup';
 import DashboardPage from './pages/DashboardPage';
 import CaregiverDashboardPage from './pages/CaregiverDashboardPage';
 import UserDashboardPage from './pages/UserDashboardPage';
