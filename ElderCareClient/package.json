@@ -15,15 +15,14 @@
     "react-calendar": "^5.1.0",
     "react-dom": "^18.3.1",
     "react-router-dom": "^7.0.1",
-    "react-scripts": "5.0.1",
     "react-toastify": "^10.0.6",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "eslint .",
+    "preview": "vite preview"
   },
   "eslintConfig": {
     "extends": [
@@ -42,5 +41,9 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^5.0.2",
+    "vite": "^7.1.5"
   }
 }

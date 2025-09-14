@@ -23,7 +23,7 @@ import { ToastNotification } from './ToastConfig';
 import { useNavigate } from 'react-router-dom';
 
 
-function AppContent() {
+function App() {
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false); // Sidebar starts collapsed
 
@@ -102,14 +102,5 @@ function AppContent() {
   );
 }
 
-function App() {
-  return (
-    <ThemeProvider theme={theme}>
-      <Router>
-        <AppContent />
-      </Router>
-    </ThemeProvider>
-  );
-}
 
 export default App;
