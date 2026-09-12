@@ -53,7 +53,8 @@ services:
     routes:
       # A single page application serves every path from index.html. Without
       # this, opening https://.../login directly returns 404, because no file
-      # exists at that path.
+      # exists at that path. The status must be a rewrite rather than a
+      # redirect, so the browser keeps the URL it asked for.
       - type: rewrite
         source: /*
         destination: /index.html

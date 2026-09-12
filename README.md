@@ -131,11 +131,24 @@ recreated from the repository rather than from settings typed into a dashboard.
 ### How the two halves find each other
 
 The frontend is built, not served, so `VITE_API_URL` is baked into the bundle at
-build time. Changing it needs a redeploy, not a restart.
+build time. Changing it needs a redeploy, not a restart. The live value is the
+backend's own onrender.com hostname, and it is worth checking the built bundle
+after changing it, because a wrong value fails exactly like a missing one.
 
 The backend allows exactly one browser origin, read from `ALLOWED_ORIGIN`. It
 used to be hardcoded to the deployed frontend, which meant running the client
 locally required editing the server. It now defaults to the Vite dev server.
+
+### Environment variables on the API
+
+| Variable | Value |
+| --- | --- |
+| `DATABASE_URL` | linked to the `eldercare-db` instance, internal URL |
+| `JWT_SECRET` | a 48 byte random value, base64 encoded |
+| `ALLOWED_ORIGIN` | the deployed frontend origin |
+
+Render's dashboard offers a Datastore URL option when adding a variable, which
+links the database rather than copying its password into a second place.
 
 ### The database URL
 
@@ -157,10 +170,20 @@ next request pays for the container to start again. On this image that is
 roughly thirty to fifty seconds, during which the browser is simply waiting. A
 first login attempt that appears to hang is usually this rather than a fault.
 
-Render also expires free PostgreSQL instances after a fixed period. When that
-happens a new database has to be created and the environment updated, and
-because the schema is created by Hibernate rather than by migrations, the
-accounts in it are gone with it.
+Render also expires free PostgreSQL instances thirty days after creation. The
+current instance was created on 13 September 2026, so it lapses in mid October.
+When that happens a new database has to be created and `DATABASE_URL` relinked,
+and because the schema is created by Hibernate rather than by migrations, the
+accounts in it go with it. A provider whose free tier does not expire would be a
+better home for anything that needs to keep working.
+
+### The service was deploying a year old image
+
+The API had been pointed at a Docker Hub image, `tmjoris/repository:first`,
+pushed in April 2025. Nothing committed after that had ever reached the running
+instance, so the deployed API and this repository had drifted apart completely.
+The service now builds from this repository on the `main` branch with the root
+directory set to `ElderCareServer`, and a push to `main` redeploys it.
 
 ### Moving from SQLite
 

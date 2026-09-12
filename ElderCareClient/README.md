@@ -84,9 +84,17 @@ A single page application serves every path from `index.html`. Without a rewrite
 rule, opening `/login` directly returns 404, because no file exists at that
 path. Only the home page worked, and only until the first refresh.
 
-`public/_redirects` now holds the rule, and `render.yaml` in the repository root
-declares the same thing for a blueprint deploy. The `static.json` that used to
-be here was a Heroku convention that Render never read.
+Render expects the rule in its own configuration rather than in a file in the
+build output. It is declared in `render.yaml` as a route of type `rewrite` from
+`/*` to `/index.html`, and set on the existing site under Redirects and Rewrites
+with the status code 200. A 301 would send the browser to a different URL, which
+is not what a single page application wants.
+
+Two conventions that do not work here were removed. `static.json` is a Heroku
+file that Render never reads. A `_redirects` file is the Netlify convention, and
+Render serves it as an ordinary static asset, which is easy to mistake for
+success because fetching `/_redirects` returns 200 while `/login` still returns
+404.
 
 ## Known gaps
 
