@@ -34,8 +34,8 @@ const PrescriptionsAndMedicationPage = () => {
 
   const [errors, setErrors] = useState({});
 
-  const loggedInUserRole = localStorage.getItem('mockRole');
-  const loggedInUserId = localStorage.getItem('mockId');
+  const loggedInUserRole = localStorage.getItem('role');
+  const loggedInUserId = localStorage.getItem('userId');
 
   // Mock data for demonstration
   const mockPrescriptions = [

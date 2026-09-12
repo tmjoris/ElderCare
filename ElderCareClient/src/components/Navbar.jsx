@@ -6,12 +6,12 @@ import { useNavigate } from 'react-router-dom';
 const Navbar = ({ isSidebarOpen }) => {
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState(null);
-  const isAuthenticated = !!localStorage.getItem('mockToken'); // Check if the user is logged in
+  const isAuthenticated = !!localStorage.getItem('token'); // Check if the user is logged in
 
   const handleLogout = () => {
-    localStorage.removeItem('mockToken');
-    localStorage.removeItem('mockRole');
-    localStorage.removeItem('mockId');
+    localStorage.removeItem('token');
+    localStorage.removeItem('role');
+    localStorage.removeItem('userId');
     navigate('/login'); // Redirect to login page
     handleCloseMenu();
   };

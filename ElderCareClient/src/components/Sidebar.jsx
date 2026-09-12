@@ -25,7 +25,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 
 const Sidebar = ({ isOpen, onToggleSidebar }) => {
   const location = useLocation();
-  const userRole = localStorage.getItem('mockRole') || 'guest'; // Retrieve user role from mock authentication
+  const userRole = localStorage.getItem('role') || 'guest'; // Retrieve user role from mock authentication
 
   // Role-based sidebar item configuration
   const roleBasedItems = {

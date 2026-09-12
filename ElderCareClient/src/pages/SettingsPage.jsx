@@ -19,7 +19,7 @@ const SettingsPage = () => {
     notifications: JSON.parse(localStorage.getItem('notifications')) || true,
   });
 
-  const userRole = localStorage.getItem('mockRole') || 'guest'; // Role-based settings
+  const userRole = localStorage.getItem('role') || 'guest'; // Role-based settings
 
   useEffect(() => {
     // Load initial settings for role if required

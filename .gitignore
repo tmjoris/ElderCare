@@ -51,3 +51,7 @@ out/
 ### VS Code ###
 .vscode/
 
+
+# Build output
+ElderCareClient/dist/
+ElderCareClient/node_modules/

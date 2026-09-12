@@ -1,0 +1,59 @@
+# Render blueprint for the whole application.
+#
+# This file documents the deployment that previously existed only as settings
+# typed into the Render dashboard. With it in the repository, the services can
+# be recreated from scratch and the configuration can be reviewed in a diff.
+#
+# See ElderCareServer/README or the root README for what each variable does.
+
+databases:
+  - name: eldercare-db
+    databaseName: eldercare
+    user: eldercare
+    plan: free
+
+services:
+  - type: web
+    name: eldercare-backend
+    runtime: docker
+    plan: free
+    rootDir: ElderCareServer
+    dockerfilePath: ./dockerfile
+    healthCheckPath: /actuator/health
+    envVars:
+      # Render's connectionString property is a postgres:// URI, which the JDBC
+      # driver does not accept, so the parts are passed separately and the JDBC
+      # URL is assembled from them.
+      - key: DATABASE_URL
+        fromDatabase:
+          name: eldercare-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JPA_DDL_AUTO
+        value: update
+      - key: ALLOWED_ORIGIN
+        value: https://eldercarekali.onrender.com
+
+  - type: web
+    name: eldercare-frontend
+    runtime: static
+    rootDir: ElderCareClient
+    buildCommand: npm ci && npm run build
+    staticPublishPath: ./dist
+    envVars:
+      # Vite reads this at build time, not at run time. Changing it requires a
+      # redeploy, not just a restart. The name must start with VITE_ or Vite
+      # will not expose it to the bundle.
+      - key: VITE_API_URL
+        fromService:
+          name: eldercare-backend
+          type: web
+          property: host
+    routes:
+      # A single page application serves every path from index.html. Without
+      # this, opening https://.../login directly returns 404, because no file
+      # exists at that path.
+      - type: rewrite
+        source: /*
+        destination: /index.html

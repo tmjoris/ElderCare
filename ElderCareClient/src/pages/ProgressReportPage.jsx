@@ -34,7 +34,7 @@ const ProgressReportPage = () => {
   const [editingId, setEditingId] = useState(null);
   const [userId, setUserId] = useState(null); 
 
-  const loggedInUserRole = localStorage.getItem('mockRole');
+  const loggedInUserRole = localStorage.getItem('role');
   const username = localStorage.getItem('username');
 
   const fetchUserId = async (username) => {

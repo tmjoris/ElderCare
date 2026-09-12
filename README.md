@@ -116,6 +116,64 @@ meant a new contributor had to guess the Gradle version, and the Spring Boot
 Gradle 7.5. Because the wrapper jar is a binary that runs on every build, CI
 validates its checksum against Gradle's published list before using it.
 
+## Deployment
+
+Both halves run on Render's free tier. `render.yaml` in the repository root
+describes the database, the API and the static site, so the whole thing can be
+recreated from the repository rather than from settings typed into a dashboard.
+
+| Service | Type | Source |
+| --- | --- | --- |
+| `eldercare-db` | PostgreSQL | managed by Render |
+| `eldercare-backend` | Docker web service | `ElderCareServer/dockerfile` |
+| `eldercare-frontend` | static site | `ElderCareClient`, published from `dist` |
+
+### How the two halves find each other
+
+The frontend is built, not served, so `VITE_API_URL` is baked into the bundle at
+build time. Changing it needs a redeploy, not a restart.
+
+The backend allows exactly one browser origin, read from `ALLOWED_ORIGIN`. It
+used to be hardcoded to the deployed frontend, which meant running the client
+locally required editing the server. It now defaults to the Vite dev server.
+
+### The database URL
+
+Render exposes a database as a single variable shaped like
+`postgres://user:password@host:port/database`. The PostgreSQL JDBC driver does
+not accept that form. It wants `jdbc:postgresql://host:port/database` with the
+credentials supplied separately, and given the URI as is it fails with a driver
+error that never mentions the URL.
+
+`DatabaseUrlEnvironmentPostProcessor` converts the URI before the connection
+pool is built, adds `sslmode=require` when the URI carries no query string, and
+ignores anything already beginning with `jdbc:`. Six specs cover it, including a
+password containing a colon.
+
+### Free tier behaviour worth knowing
+
+A free web service is suspended after fifteen minutes without traffic, and the
+next request pays for the container to start again. On this image that is
+roughly thirty to fifty seconds, during which the browser is simply waiting. A
+first login attempt that appears to hang is usually this rather than a fault.
+
+Render also expires free PostgreSQL instances after a fixed period. When that
+happens a new database has to be created and the environment updated, and
+because the schema is created by Hibernate rather than by migrations, the
+accounts in it are gone with it.
+
+### Moving from SQLite
+
+The API previously ran on SQLite, with the database file committed to the
+repository at `src/main/resources/databases/debut.db` and copied into the image
+by the Dockerfile. That file is no longer in the repository, and the Dockerfile
+no longer refers to it.
+
+Accounts do not survive the move. Anyone who had an account needs to register
+again, which is unavoidable in any case: the passwords in the old file were
+stored in plain text, and bcrypt cannot verify a password against one. Rather
+than carrying that data forward, it is left behind.
+
 ## Known gaps
 
 Role checks live in two places. The filter chain enforces coarse rules by route,

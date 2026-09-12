@@ -35,7 +35,7 @@ const PatientsPage = () => {
   });
   const [errors, setErrors] = useState({});
   const [isEditing, setIsEditing] = useState(false);
-  const loggedInUserRole = localStorage.getItem('mockRole');
+  const loggedInUserRole = localStorage.getItem('role');
   const loggedInUser = localStorage.getItem('username');
   const apiURL = `${apiUrl}/api/patients`;
 

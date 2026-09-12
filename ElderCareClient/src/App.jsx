@@ -27,8 +27,8 @@ function App() {
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false); // Sidebar starts collapsed
 
-  const isAuthenticated = localStorage.getItem('mockToken');
-  const userRole = localStorage.getItem('mockRole') || 'guest';
+  const isAuthenticated = localStorage.getItem('token');
+  const userRole = localStorage.getItem('role') || 'guest';
 
   const hideSidebarAndNavbar = ['/login', '/signup'].includes(location.pathname);
   const navigate = useNavigate();
@@ -49,7 +49,9 @@ function App() {
           />
           <Route
             path="/caregiver-dashboard"
-            element={isAuthenticated && userRole === 'caregiver' ? <CaregiverDashboardPage /> : <Navigate to="/login" />}
+            element={isAuthenticated && (userRole === 'caregiver' || userRole === 'nurse')
+              ? <CaregiverDashboardPage />
+              : <Navigate to="/login" />}
           />
           <Route
             path="/patient-dashboard"

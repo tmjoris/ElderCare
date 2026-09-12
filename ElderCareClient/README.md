@@ -1,70 +1,99 @@
-# Getting Started with Create React App
+# ElderCare client
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+The React frontend, built with Vite and Material UI, deployed to Render as a
+static site.
 
-## Available Scripts
+## Running it locally
 
-In the project directory, you can run:
+```
+npm install
+npm run dev
+```
 
-### `npm start`
+The dev server listens on port 5173, which is the origin the backend allows by
+default, so a locally running API needs no extra configuration.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Configuration
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+One variable, read at build time:
 
-### `npm test`
+| Variable | Purpose | Default |
+| --- | --- | --- |
+| `VITE_API_URL` | Base URL of the backend, with no trailing slash | `http://localhost:8080` |
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Vite inlines this into the bundle when the site is built, so changing it on
+Render requires a redeploy rather than a restart. The name has to begin with
+`VITE_`, because Vite refuses to expose anything else to client code.
 
-### `npm run build`
+For a local build against a deployed API:
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+```
+VITE_API_URL=https://your-backend.onrender.com npm run build
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## How a request works
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+`src/api.js` is imported once from `main.jsx` and installs two axios
+interceptors that apply to every call in the application.
 
-### `npm run eject`
+The request interceptor reads the token from local storage and attaches it as
+`Authorization: Bearer <token>`. The pages call `axios` directly rather than
+going through a shared client, so doing this globally means no call site has to
+remember it.
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+The response interceptor watches for 401. A 401 means the token is missing,
+expired, or signed with a key the server no longer holds. When one arrives the
+stored session is cleared and the browser is sent to the login page, instead of
+leaving the user on a dashboard where every request quietly fails.
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+Login itself lives in `src/pages/LoginPage.jsx`. It posts `username` and
+`password` to `/api/users/login`, and on success stores the token, the role and
+the username through `storeSession`, then routes by role.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+## Why login was broken
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+`src/config.jsx` read `import.meta.env.REACT_APP_API_URL`. That name is a
+create-react-app convention, and this project moved to Vite in an earlier
+commit. Vite only exposes variables prefixed with `VITE_`, and it performs the
+substitution statically at build time, so the expression was replaced with
+`undefined`. The deployed bundle contained `ut=void 0`.
 
-## Learn More
+Every request therefore went to `undefined/api/users/login`. A browser resolves
+that against the current origin, so the real request was for
+`https://eldercarekali.onrender.com/undefined/api/users/login`, the static host
+answered 404, and the page reported "Login failed" without ever reaching the
+API. The catch block treated every error the same way, so nothing on screen
+distinguished a wrong password from a request that never arrived.
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+Three changes followed. The variable is now `VITE_API_URL` with a local
+fallback, and a production build without it logs an explicit error rather than
+failing silently. The login handler separates a 401 from a request that got no
+response, and says which happened. `src/services/auth.jsx` has been deleted: it
+held a parallel mock login with hardcoded users, pointed at `localhost:5000/api`
+and at endpoint paths the backend does not have, and nothing imported it.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+A second problem sat behind the first. The backend issues the role `nurse`,
+while the routing table only knew `caregiver`. A nurse who logged in fell
+through to the patient dashboard, which rejected the role and sent them back to
+login, so a successful sign in still looked like a failure. Both names now
+resolve to the caregiver dashboard.
 
-### Code Splitting
+## Deep links and page refresh
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+A single page application serves every path from `index.html`. Without a rewrite
+rule, opening `/login` directly returns 404, because no file exists at that
+path. Only the home page worked, and only until the first refresh.
 
-### Analyzing the Bundle Size
+`public/_redirects` now holds the rule, and `render.yaml` in the repository root
+declares the same thing for a blueprint deploy. The `static.json` that used to
+be here was a Heroku convention that Render never read.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+## Known gaps
 
-### Making a Progressive Web App
+The token is kept in local storage, which is readable by any script running on
+the page. A cookie marked `HttpOnly` would be the safer place for it, and would
+require the backend to set and read it.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Role checks in `App.jsx` decide only which route renders. They are a
+convenience, not a control: the server is what actually enforces access, and it
+does so on every request.

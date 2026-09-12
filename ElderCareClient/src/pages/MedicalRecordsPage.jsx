@@ -33,7 +33,7 @@ const MedicalRecordsPage = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const username = localStorage.getItem('username');
-  const loggedInUserRole = localStorage.getItem('mockRole');
+  const loggedInUserRole = localStorage.getItem('role');
 
   const fetchUserId = async (username) => {
     try {

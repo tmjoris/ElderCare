@@ -5,6 +5,7 @@ import { showSuccess, showError } from '../ToastConfig';
 import FormInput from '../components/FormInput';
 import axios from 'axios';
 import apiUrl from '../config';
+import { storeSession } from '../api';
 
 const LoginPage = () => {
   const [username, setUsername] = useState('');
@@ -15,8 +16,8 @@ const LoginPage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const role = localStorage.getItem('mockRole');
-    const token = localStorage.getItem('mockToken');
+    const role = localStorage.getItem('role');
+    const token = localStorage.getItem('token');
     setUserRole(role || 'guest');
     setIsAuthenticated(!!token);
   }, []);
@@ -43,21 +44,21 @@ const LoginPage = () => {
 
       if (response.status === 200) {
         const { role, message, token } = response.data;
-        localStorage.setItem('mockRole', role);
-        localStorage.setItem('mockToken', token);
-        localStorage.setItem('username', username);
-        
+        storeSession({ token, role, username });
+
         setUserRole(role);
         setIsAuthenticated(true);
 
         showSuccess(message);
-        
-        // Navigate based on role
+
+        // The backend issues the role "nurse". The dashboard for that role is
+        // named after the caregiver, so both names route to the same place.
         switch (role.toLowerCase()) {
           case 'doctor':
             navigate('/dashboard');
             break;
           case 'caregiver':
+          case 'nurse':
             navigate('/caregiver-dashboard');
             break;
           case 'patient':
@@ -68,7 +69,14 @@ const LoginPage = () => {
         }
       }
     } catch (err) {
-      showError('Login failed'); // Show error message from API response
+      const status = err.response?.status;
+      if (status === 401) {
+        showError('Incorrect username or password');
+      } else if (err.request && !err.response) {
+        showError('Could not reach the server. Check that the API is running.');
+      } else {
+        showError('Login failed');
+      }
     }
   };
 
