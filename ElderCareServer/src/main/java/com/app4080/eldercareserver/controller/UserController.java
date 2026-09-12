@@ -1,5 +1,6 @@
 package com.app4080.eldercareserver.controller;
 
+import com.app4080.eldercareserver.config.JwtService;
 import com.app4080.eldercareserver.dto.user.UserRegistrationRequest;
 import com.app4080.eldercareserver.dto.user.UserResponse;
 import com.app4080.eldercareserver.dto.user.UserUpdateRequest;
@@ -8,10 +9,6 @@ import com.app4080.eldercareserver.entity.User;
 import com.app4080.eldercareserver.repository.UserRepository;
 import com.app4080.eldercareserver.service.UserService;
 
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.security.Keys;
-import java.security.Key;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,7 +16,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.nio.file.AccessDeniedException;
-import java.sql.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,11 +26,15 @@ public class UserController {
 
     private final UserService userService;
     private final UserRepository userRepository;
+    private final JwtService jwtService;
 
     @Autowired
-    public UserController(UserService userService, UserRepository userRepository) {
+    public UserController(UserService userService,
+                          UserRepository userRepository,
+                          JwtService jwtService) {
         this.userService = userService;
         this.userRepository = userRepository;
+        this.jwtService = jwtService;
     }
 
     @PostMapping("/register")
@@ -82,7 +82,7 @@ public class UserController {
 
             User user = userService.fetchUserByUsername(loginRequest.getUsername());
             String role = user.getRole().toLowerCase();
-            String token = generateToken(user);
+            String token = jwtService.generateToken(user.getUsername(), role);
 
             Map<String, String> response = new HashMap<>();
         
@@ -96,23 +96,6 @@ public class UserController {
             errorResponse.put("message", e.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
         }        
-    }
-
-    @SuppressWarnings("deprecation")
-    private String generateToken(User user) {
-        // Set expiration time for the token 12 hours)
-        long expirationTime = 1000 * 60 * 60 * 12;
-
-        Key secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS256);
-
-    
-        return Jwts.builder()
-                .setSubject(user.getUsername())
-                .claim("role", user.getRole())
-                .setIssuedAt(new Date(expirationTime))
-                .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
-                .signWith(secretKey) 
-                .compact();
     }
 
 

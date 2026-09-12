@@ -5,9 +5,17 @@
 HELP.md
 ElderCareServer/.gradle/
 ElderCareServer/build/
-ElderCareServer/gradle/
-gradlew.bat
-gradlew
+
+# The Gradle wrapper is deliberately committed. CI and anyone cloning the repo
+# needs it to build without installing a matching Gradle themselves.
+!ElderCareServer/gradle/wrapper/
+!ElderCareServer/gradlew
+!ElderCareServer/gradlew.bat
+
+# Local database files should never be committed.
+*.db
+*.sqlite
+*.sqlite3
 
 !**/src/main/**/build/
 !**/src/test/**/build/

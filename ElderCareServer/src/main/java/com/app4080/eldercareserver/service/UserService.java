@@ -8,6 +8,7 @@ import com.app4080.eldercareserver.dto.user.LoginRequest;
 import com.app4080.eldercareserver.entity.User;
 import com.app4080.eldercareserver.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,10 +23,12 @@ import java.util.stream.Collectors;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     // Validate user privileges
@@ -78,7 +81,7 @@ public class UserService {
         user.setUsername(registrationRequest.getUsername());
         user.setFirstName(registrationRequest.getFirstName());
         user.setSecondName(registrationRequest.getSecondName());
-        user.setPassword(registrationRequest.getPassword()); // Remember to hash the password!
+        user.setPassword(passwordEncoder.encode(registrationRequest.getPassword()));
         user.setEmail(registrationRequest.getEmail());
         user.setPrimaryLocation(registrationRequest.getPrimaryLocation());
         user.setSecondaryLocation(registrationRequest.getSecondaryLocation());
@@ -128,7 +131,7 @@ public class UserService {
             throw new IllegalArgumentException("Username not found");
         }
 
-        if (!loginRequest.getPassword().equals(existing.get().getPassword())) {
+        if (!passwordEncoder.matches(loginRequest.getPassword(), existing.get().getPassword())) {
             throw new AccessDeniedException("Invalid password");
         }
     }

@@ -14,6 +14,9 @@ public class UserRegistrationRequest {
     private String secondaryLocation;
     private String phoneNumber;
 
+    public UserRegistrationRequest() {
+    }
+
     public UserRegistrationRequest(String username, String password, String email, String primaryLocation, String role, String privileges, String secondaryLocation, String phoneNumber) {
         this.username = username;
         this.password = password;
