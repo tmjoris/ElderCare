@@ -2,6 +2,7 @@ package com.app4080.eldercareserver.repository
 
 import com.app4080.eldercareserver.entity.User
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
@@ -16,8 +17,12 @@ import java.time.LocalDateTime
  * These need a Docker daemon, so they are excluded from the unitTest task and
  * verified in CI. The project previously ran on SQLite, where several of the
  * queries below behave differently.
+ *
+ * DataJpaTest swaps in an embedded database by default, which would quietly
+ * undo the point of the container, so that replacement is turned off.
  */
 @DataJpaTest
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class UserRepositoryIntegrationSpec extends Specification {
 
     static PostgreSQLContainer postgres = new PostgreSQLContainer('postgres:16-alpine')
