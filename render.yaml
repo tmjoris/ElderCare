@@ -18,7 +18,7 @@ services:
     runtime: docker
     plan: free
     rootDir: ElderCareServer
-    dockerfilePath: ./dockerfile
+    dockerfilePath: ./Dockerfile
     healthCheckPath: /actuator/health
     envVars:
       # Render's connectionString property is a postgres:// URI, which the JDBC
