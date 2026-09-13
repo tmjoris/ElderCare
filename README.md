@@ -63,58 +63,23 @@ Docker, run `unitTest` locally and let CI run the full suite.
 
 Coverage reports land in `build/reports/jacoco/test` after a full run.
 
-## Security work
+## Security
 
-The authentication in the first version of this project did not work, in ways
-worth writing down rather than quietly fixing.
+Passwords are hashed with bcrypt and verified through `PasswordEncoder.matches`.
+One spec registers two users who chose the same password and asserts the stored
+values differ, which is what the per user salt buys you.
 
-Passwords were stored as the user typed them. `registerUser` wrote the raw
-string to the database, with the note `// Remember to hash the password!` still
-in the source, and `login` compared the submitted password using
-`String.equals`. Passwords are now hashed with bcrypt and checked through
-`PasswordEncoder.matches`. One of the specs registers two users who chose the
-same password and asserts the stored values differ, which is what the per user
-salt buys you.
+Tokens are signed in `JwtService` against a single key loaded from
+configuration, and the application refuses to start if that key decodes to fewer
+than 32 bytes. Two specs pin the property that matters: a second instance
+holding the same secret accepts a token issued by the first, and an instance
+holding a different secret rejects it.
 
-Token issuing was decorative. `generateToken` called `Keys.secretKeyFor(HS256)`
-inside the login handler, which minted a fresh random signing key on every
-request. No token the server issued could be verified afterwards, including by
-the server that issued it. Signing now happens in `JwtService` against one key
-loaded from configuration. Two specs cover this directly: one asserts that a
-second service instance holding the same secret accepts a token issued by the
-first, and one asserts that an instance holding a different secret rejects it.
-
-The same method set `issuedAt` to `new Date(expirationTime)`, where
-`expirationTime` was a duration in milliseconds rather than a timestamp, so
-every token claimed to have been issued twelve hours after the epoch.
-
-Nothing checked tokens. There was no Spring Security dependency and no filter,
-so every endpoint answered an anonymous caller, including the user search at
-`/api/users/search/{term}`. There is now a filter chain, and registration and
-login are the only routes open to an unauthenticated request.
-
-Writing the controller specs turned up one more thing. Spring Security answers
-an anonymous request to a protected route with 403 by default, which conflates
-"you did not identify yourself" with "you are not allowed to do this". The chain
-now installs an entry point that returns 401 for the first case and leaves 403
-for the second.
-
-### Other changes
-
-The database moved from SQLite to PostgreSQL. A binary `debut.db` had been
-committed under `src/main/resources` and is gone, along with the line in the
-Dockerfile that copied it into the image.
-
-The Dockerfile now builds the jar inside the image in a first stage and copies
-only the jar into a JRE image, rather than depending on whatever happened to be
-left in `build/libs` on the machine running the build. It also runs as a non
-root user.
-
-The Gradle wrapper is committed. It had been excluded by `.gitignore`, which
-meant a new contributor had to guess the Gradle version, and the Spring Boot
-3.3 plugin fails with an unhelpful resolution error on anything older than
-Gradle 7.5. Because the wrapper jar is a binary that runs on every build, CI
-validates its checksum against Gradle's published list before using it.
+A `SecurityFilterChain` validates the bearer token on every request.
+Registration and login are the only routes open to an unauthenticated caller.
+An anonymous request gets 401 and an authenticated one without the right role
+gets 403, rather than collapsing both into 403 as Spring Security does by
+default.
 
 ## Deployment
 
@@ -135,9 +100,8 @@ build time. Changing it needs a redeploy, not a restart. The live value is the
 backend's own onrender.com hostname, and it is worth checking the built bundle
 after changing it, because a wrong value fails exactly like a missing one.
 
-The backend allows exactly one browser origin, read from `ALLOWED_ORIGIN`. It
-used to be hardcoded to the deployed frontend, which meant running the client
-locally required editing the server. It now defaults to the Vite dev server.
+The backend allows one browser origin, read from `ALLOWED_ORIGIN`, defaulting to
+the Vite dev server so a local frontend needs no extra configuration.
 
 ### Environment variables on the API
 
@@ -166,36 +130,14 @@ password containing a colon.
 ### Free tier behaviour worth knowing
 
 A free web service is suspended after fifteen minutes without traffic, and the
-next request pays for the container to start again. On this image that is
-roughly thirty to fifty seconds, during which the browser is simply waiting. A
-first login attempt that appears to hang is usually this rather than a fault.
+next request pays for the container to start again. That is roughly thirty to
+fifty seconds, during which the browser simply waits. A first login attempt that
+appears to hang is usually this rather than a fault.
 
-Render also expires free PostgreSQL instances thirty days after creation. The
-current instance was created on 13 September 2026, so it lapses in mid October.
-When that happens a new database has to be created and `DATABASE_URL` relinked,
-and because the schema is created by Hibernate rather than by migrations, the
-accounts in it go with it. A provider whose free tier does not expire would be a
-better home for anything that needs to keep working.
-
-### The service was deploying a year old image
-
-The API had been pointed at a Docker Hub image, `tmjoris/repository:first`,
-pushed in April 2025. Nothing committed after that had ever reached the running
-instance, so the deployed API and this repository had drifted apart completely.
-The service now builds from this repository on the `main` branch with the root
-directory set to `ElderCareServer`, and a push to `main` redeploys it.
-
-### Moving from SQLite
-
-The API previously ran on SQLite, with the database file committed to the
-repository at `src/main/resources/databases/debut.db` and copied into the image
-by the Dockerfile. That file is no longer in the repository, and the Dockerfile
-no longer refers to it.
-
-Accounts do not survive the move. Anyone who had an account needs to register
-again, which is unavoidable in any case: the passwords in the old file were
-stored in plain text, and bcrypt cannot verify a password against one. Rather
-than carrying that data forward, it is left behind.
+Render expires free PostgreSQL instances thirty days after creation. This one
+was created on 13 September 2026, so it lapses in mid October. A new database
+then has to be created and `DATABASE_URL` relinked, and because Hibernate
+creates the schema rather than a migration tool, the accounts go with it.
 
 ## Known gaps
 

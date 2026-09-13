@@ -50,51 +50,19 @@ Login itself lives in `src/pages/LoginPage.jsx`. It posts `username` and
 `password` to `/api/users/login`, and on success stores the token, the role and
 the username through `storeSession`, then routes by role.
 
-## Why login was broken
-
-`src/config.jsx` read `import.meta.env.REACT_APP_API_URL`. That name is a
-create-react-app convention, and this project moved to Vite in an earlier
-commit. Vite only exposes variables prefixed with `VITE_`, and it performs the
-substitution statically at build time, so the expression was replaced with
-`undefined`. The deployed bundle contained `ut=void 0`.
-
-Every request therefore went to `undefined/api/users/login`. A browser resolves
-that against the current origin, so the real request was for
-`https://eldercarekali.onrender.com/undefined/api/users/login`, the static host
-answered 404, and the page reported "Login failed" without ever reaching the
-API. The catch block treated every error the same way, so nothing on screen
-distinguished a wrong password from a request that never arrived.
-
-Three changes followed. The variable is now `VITE_API_URL` with a local
-fallback, and a production build without it logs an explicit error rather than
-failing silently. The login handler separates a 401 from a request that got no
-response, and says which happened. `src/services/auth.jsx` has been deleted: it
-held a parallel mock login with hardcoded users, pointed at `localhost:5000/api`
-and at endpoint paths the backend does not have, and nothing imported it.
-
-A second problem sat behind the first. The backend issues the role `nurse`,
-while the routing table only knew `caregiver`. A nurse who logged in fell
-through to the patient dashboard, which rejected the role and sent them back to
-login, so a successful sign in still looked like a failure. Both names now
-resolve to the caregiver dashboard.
-
 ## Deep links and page refresh
 
-A single page application serves every path from `index.html`. Without a rewrite
-rule, opening `/login` directly returns 404, because no file exists at that
-path. Only the home page worked, and only until the first refresh.
+A single page application serves every path from `index.html`. Render needs that
+rule in its own configuration rather than in a file in the build output. It is
+declared in `render.yaml` as a route of type `rewrite` from `/*` to
+`/index.html`, and set on the site under Redirects and Rewrites with status 200.
+A 301 would send the browser to a different URL, which is not what a single page
+application wants.
 
-Render expects the rule in its own configuration rather than in a file in the
-build output. It is declared in `render.yaml` as a route of type `rewrite` from
-`/*` to `/index.html`, and set on the existing site under Redirects and Rewrites
-with the status code 200. A 301 would send the browser to a different URL, which
-is not what a single page application wants.
-
-Two conventions that do not work here were removed. `static.json` is a Heroku
-file that Render never reads. A `_redirects` file is the Netlify convention, and
-Render serves it as an ordinary static asset, which is easy to mistake for
-success because fetching `/_redirects` returns 200 while `/login` still returns
-404.
+Two conventions do not work here. `static.json` is a Heroku file that Render
+never reads, and a `_redirects` file is the Netlify convention, which Render
+serves as an ordinary static asset. The second is easy to mistake for success,
+because fetching `/_redirects` returns 200 while `/login` still returns 404.
 
 ## Known gaps
 
