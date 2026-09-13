@@ -83,15 +83,20 @@ default.
 
 ## Deployment
 
-Both halves run on Render's free tier. `render.yaml` in the repository root
-describes the database, the API and the static site, so the whole thing can be
-recreated from the repository rather than from settings typed into a dashboard.
+Both halves run on Render's free tier, with the database hosted on Neon.
+`render.yaml` in the repository root describes the API and the static site, so
+they can be recreated from the repository rather than from settings typed into a
+dashboard.
 
 | Service | Type | Source |
 | --- | --- | --- |
-| `eldercare-db` | PostgreSQL | managed by Render |
-| `eldercare-backend` | Docker web service | `ElderCareServer/dockerfile` |
+| `eldercare` | PostgreSQL | Neon, free tier |
+| `eldercare-backend` | Docker web service | `ElderCareServer/Dockerfile` |
 | `eldercare-frontend` | static site | `ElderCareClient`, published from `dist` |
+
+The database is on Neon rather than Render because Render deletes a free
+PostgreSQL instance thirty days after it is created. Neon's free tier has no
+expiry, which matters for something meant to stay reachable.
 
 ### How the two halves find each other
 
@@ -107,20 +112,17 @@ the Vite dev server so a local frontend needs no extra configuration.
 
 | Variable | Value |
 | --- | --- |
-| `DATABASE_URL` | linked to the `eldercare-db` instance, internal URL |
+| `DATABASE_URL` | the Neon connection string |
 | `JWT_SECRET` | a 48 byte random value, base64 encoded |
 | `ALLOWED_ORIGIN` | the deployed frontend origin |
 
-Render's dashboard offers a Datastore URL option when adding a variable, which
-links the database rather than copying its password into a second place.
-
 ### The database URL
 
-Render exposes a database as a single variable shaped like
-`postgres://user:password@host:port/database`. The PostgreSQL JDBC driver does
-not accept that form. It wants `jdbc:postgresql://host:port/database` with the
-credentials supplied separately, and given the URI as is it fails with a driver
-error that never mentions the URL.
+Neon and most managed providers expose a database as a single variable shaped
+like `postgres://user:password@host:port/database`. The PostgreSQL JDBC driver
+does not accept that form. It wants `jdbc:postgresql://host:port/database` with
+the credentials supplied separately, and given the URI as is it fails with a
+driver error that never mentions the URL.
 
 `DatabaseUrlEnvironmentPostProcessor` converts the URI before the connection
 pool is built, adds `sslmode=require` when the URI carries no query string, and
@@ -132,12 +134,8 @@ password containing a colon.
 A free web service is suspended after fifteen minutes without traffic, and the
 next request pays for the container to start again. That is roughly thirty to
 fifty seconds, during which the browser simply waits. A first login attempt that
-appears to hang is usually this rather than a fault.
-
-Render expires free PostgreSQL instances thirty days after creation. This one
-was created on 13 September 2026, so it lapses in mid October. A new database
-then has to be created and `DATABASE_URL` relinked, and because Hibernate
-creates the schema rather than a migration tool, the accounts go with it.
+appears to hang is usually this rather than a fault. Neon also scales its free
+compute to zero, so the first query after an idle period adds a little more.
 
 ## Known gaps
 
